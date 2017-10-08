@@ -132,11 +132,11 @@ def merge_df_results(df_score_https, df_score_performance, df_trust_performance)
 
     #assegno un bollino allo score
     df_res.loc[:, 'Sticker'] = '/static/img/CircleF.png'
-    df_res['Sticker'] = np.where(df_res['Tot Score'] >= 1500, 'https://github.com/bsab/security-dashboard/blob/master/static/img/circleA.png?raw=true',
-                                 np.where(df_res['Tot Score'] >= 1200, '/static/img/CircleB.png',
-                                          np.where(df_res['Tot Score'] >= 900, '/static/img/CircleC.png',
-                                                   np.where(df_res['Tot Score'] >= 600, '/static/img/CircleD.png',
-                                                            np.where(df_res['Tot Score'] >= 300, '/static/img/CircleE.png',
-                                                                     '/static/img/CircleF.png')))))
+    df_res['Sticker'] = np.where(df_res['Tot Score'] >= 1500, 'https://raw.githubusercontent.com/bsab/security-dashboard/master/static/img/circleA.png',
+                                 np.where(df_res['Tot Score'] >= 1200, 'https://raw.githubusercontent.com/bsab/security-dashboard/master/static/img/circleB.png',
+                                          np.where(df_res['Tot Score'] >= 900, 'https://raw.githubusercontent.com/bsab/security-dashboard/master/static/img/circleC.png',
+                                                   np.where(df_res['Tot Score'] >= 600, 'https://raw.githubusercontent.com/bsab/security-dashboard/master/static/img/circleD.png',
+                                                            np.where(df_res['Tot Score'] >= 300, 'https://raw.githubusercontent.com/bsab/security-dashboard/master/static/img/circleE.png',
+                                                                     'https://raw.githubusercontent.com/bsab/security-dashboard/master/static/img/circleF.png')))))
 
     return df_res
