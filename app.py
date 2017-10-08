@@ -73,8 +73,8 @@ def add_markers( figure_data, domains, plot_type = 'scatter3d' ):
 
 
 BACKGROUND = 'rgb(230, 230, 230)'
-COLORSCALE = [[0, "F44336"], [0.25, "#E29A3E"],
-               [0.5, "#C9D144"], [0.75, "#7FC049"], [1, "#4CAF50"] ]
+COLORSCALE = [[0, "#4CAF50"], [0.25, "#7FC049"],
+               [0.5, "#C9D144"], [0.75, "#E29A3E"], [1, "#F44336"] ]
 
 def create_scatter_plot(
         x=df['HTTPS Score'],
