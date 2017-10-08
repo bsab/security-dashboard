@@ -7,15 +7,26 @@ from dash.dependencies import Input, Output
 from score import evalute_https_score, evalute_performance_score, evalute_trust_score, merge_df_results
 from layout import get_html_layout, make_dash_table
 
+# Configurazione server Flask
 STATIC_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static')
 server = flask.Flask('security-dashboard')
 app = dash.Dash('security-dashboard', server=server, url_base_pathname='/security-dashboard/', csrf_protect=False)
 server.secret_key = os.environ.get('secret_key', 'secret')
 
+#
+# Import dei csv ottenuti dall'utility domain-scan
+#
+
+#1) import del csv relativo al test HTTPS (pshtt scanner)
 df_score_https = evalute_https_score("csv/pshtt.csv")
+
+#2) import del csv relativo al test sulle performance (pageload scanner)
 df_score_performance = evalute_performance_score("csv/pageload.csv")
+
+#3) import del csv relativo al test sull'affidabilita' (trustymail scanner)
 df_trust_performance = evalute_trust_score("csv/trustymail.csv")
 
+#4)
 df_result = merge_df_results(df_score_https, df_score_performance, df_trust_performance)
 
 df = df_result
