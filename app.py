@@ -7,7 +7,6 @@ import logging
 
 import dash_html_components as html
 
-
 from dash.dependencies import Input, Output
 from plot import create_scatter_plot
 from score import evalute_https_score, evalute_performance_score, evalute_trust_score, merge_df_results
@@ -78,17 +77,17 @@ app.layout = get_html_layout(starting_domain,
 def highlight_domain(chem_dropdown_values, plot_type):
     return create_scatter_plot(x, y, z, size, color, xlabel, ylabel, zlabel, plot_type, text)
 
-
 @app.callback(
     Output('table-element', 'children'),
     [Input('chem_dropdown', 'value')])
 def update_table(chem_dropdown_value):
+    """ Modifica la tabella con i domini selezionati """
     table = make_dash_table( chem_dropdown_value, df_result)
     return table
 
 
 def dfRowFromHover( hoverData ):
-    """ Returns row for hover point as a Pandas Series """
+    """ Ritorna il dominio in hover """
     if hoverData is not None:
         if 'points' in hoverData:
             firstPoint = hoverData['points'][0]
@@ -98,39 +97,38 @@ def dfRowFromHover( hoverData ):
                 return df_result.loc[df_result['Domain'] == domain_name]
     return pd.Series()
 
-
 @app.callback(
     Output('chem_name', 'children'),
     [Input('clickable-graph', 'hoverData')])
 def return_domain_name(hoverData):
+    """ Ritorna il dominio in hover """
     if hoverData is not None:
         if 'points' in hoverData:
             firstPoint = hoverData['points'][0]
             if 'pointNumber' in firstPoint:
                 point_number = firstPoint['pointNumber']
-                #domain_name = str(FIGURE['data'][0]['text'][point_number]).strip()
+                domain_name = str(domain_plot['data'][0]['text'][point_number]).strip()
                 return ""
-
 
 @app.callback(
     dash.dependencies.Output('chem_name', 'href'),
     [dash.dependencies.Input('clickable-graph', 'hoverData')])
 def return_href(hoverData):
+    """ Ritorna il link del dominio in hover """
     row = dfRowFromHover(hoverData)
     if row.empty:
         return
     datasheet_link = "http://" + row['Domain'].iloc[0]
     return datasheet_link
 
-
 @app.callback(
     Output('chem_img', 'src'),
     [Input('clickable-graph', 'hoverData')])
 def display_image(hoverData):
+    """ Ritorna l'immagine dello score corrispondente al dominio in hover """
     row = dfRowFromHover(hoverData)
     if row.empty:
         return
-
     img_src = row['Sticker'].iloc[0]
     return img_src
 
@@ -138,12 +136,11 @@ def display_image(hoverData):
 @app.callback(
     Output('chem_desc', 'children'),
     [Input('clickable-graph', 'hoverData')])
-
 def display_domain(hoverData):
+    """ Ritorna il layout HTML dei parametri del dominio in hover"""
     row = dfRowFromHover(hoverData)
     if row.empty:
         return
-
     description = html.Div([
         html.P("HTTPS SCORE: " + str(row['HTTPS Score'].iloc[0])),
         html.P("PERFORMANCE SCORE: " + str(row['Performance Score'].iloc[0])),
@@ -155,8 +152,10 @@ def display_domain(hoverData):
 
 @app.server.route('/static/<resource>')
 def serve_static(resource):
+    """ Serve gli statici dalla cartella /static/ """
     return flask.send_from_directory(STATIC_PATH, resource)
 
+# Aggiunta di file CSS esterni
 external_css = ["https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css",
                 "//fonts.googleapis.com/css?family=Raleway:400,300,600",
                 "//fonts.googleapis.com/css?family=Dosis:Medium",
