@@ -32,9 +32,14 @@ If you prefer to run it directly on your local machine, I suggest using
 [virtualenvwrapper](https://virtualenvwrapper.readthedocs.io/en/stable/)),
 anyway here the commands you have to enter:
 
+    git clone https://github.com/bsab/security-dashboard
+    cd security-dashboard
     pip install -r requirements.txt
 
-Then:
+Running Your Application
+------------------------
+
+Now, you can run the application locally.
 
     python app.py
 
