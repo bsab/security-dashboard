@@ -70,7 +70,7 @@ def evalute_performance_score(file_pageload_csv):
 
     #print("-----------PERFORMANCE---------------")
     #print(df_score_performance)
-    df_score_performance.to_csv("df_score_performance.csv", index=False)
+    #df_score_performance.to_csv("df_score_performance.csv", index=False)
 
     return df_score_performance
 
