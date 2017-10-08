@@ -59,8 +59,13 @@ def get_html_layout(starting_domain,
     html.Div([
         html.Div([
             html.Div([
-                html.P('Passa il mouse su un dominio nel grafico per vedere i parametri di sicurezza sulla sinstra.'),
-                html.P('Seleziona i domini da menu per aggiungerli alla tabella in basso.')
+                html.Div('Seleziona un dominio dalla barra di ricerca o direttamente cliccando sul grafico.'
+                         ' Ad ogni dominio e\' stato associato un punteggio da A a F. '
+                         'Il calcolo del punteggio viene effettuato sulla base di 3 caratteristiche:'
+                         '<ol><li>Sicurezza: garantita dall\'uso del protocollo HTTPS o HTS</li>'
+                         '<li>Performance: analizzando i tempi di caricamento delle pagine e degli assets</li>'
+                         '<li>Affidabilita\': **********</li></ol> Il dominio che ottiene il valore piu\' alto '
+                         'in tuttee tre queste caratteristiche puo essere considerato un dominio altamente sicuro.'),
             ], style={'margin-left': '10px'}),
             dcc.Dropdown(id='chem_dropdown',
                          multi=True,
