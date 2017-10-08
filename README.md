@@ -1,7 +1,7 @@
 # Security-Dashboard #
 A dashboard that shows the status of security features on .gov.it websites
 
-Check out the [Live Demo](https://security-dashboard.herokuapp.com).
+Check out the [Live Demo](https://security-dashboard.herokuapp.com/security-dashboard).
 
 Usage
 ----
