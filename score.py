@@ -1,6 +1,9 @@
 import pandas as pd
 import numpy as np
+import logging
 
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 def evalute_https_score(file_pshtt_csv):
     """
@@ -16,9 +19,13 @@ def evalute_https_score(file_pshtt_csv):
                'Domain Enforces HTTPS',
                'Domain Uses Strong HSTS']
 
-    # Scan domains and return data based on HTTPS best practices
-    pshtt = pd.read_csv(file_pshtt_csv,
-                        usecols=columns)
+    try:
+        # Scan domains and return data based on HTTPS best practices
+        pshtt = pd.read_csv(file_pshtt_csv,
+                            usecols=columns)
+    except IOError as e:
+        logger.error('Cannot load csv security file', exc_info=False)
+        exit(-1)
 
     # associo uno score rispetto ai boolean contenuti nelle rispettive colonne selezionate
     pshtt[['Domain Supports HTTPS']] *= 5
@@ -49,8 +56,12 @@ def evalute_performance_score(file_pageload_csv):
                'domComplete']
 
     # Scan domains and return web performance metrics collector
-    pageload = pd.read_csv(file_pageload_csv,
-                           usecols=columns)
+    try:
+        pageload = pd.read_csv(file_pageload_csv,
+                               usecols=columns)
+    except IOError as e:
+        logger.error('Cannot load csv performance file', exc_info=False)
+        exit(-1)
 
     # eseguo la somma degli score per ottenere un valore di score totale rispetto all'uso di HTTPS
     pageload.loc[:, 'Performance Score'] = (pageload['domContentLoaded'] + \
@@ -89,7 +100,11 @@ def evalute_trust_score(file_trust_csv):
                'Valid DMARC']
 
     # Scan domains and return web performance metrics collector
-    df_trust_performance = pd.read_csv(file_trust_csv, usecols=columns)
+    try:
+        df_trust_performance = pd.read_csv(file_trust_csv, usecols=columns)
+    except IOError as e:
+        logger.error('Cannot load csv trust file', exc_info=False)
+        exit(-1)
 
     # associo uno score rispetto ai boolean contenuti nelle rispettive colonne selezionate
     df_trust_performance[['MX Record']] *= 5

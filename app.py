@@ -3,6 +3,7 @@ import os
 import flask
 import dash
 import pandas as pd
+import logging
 
 import dash_html_components as html
 
@@ -11,6 +12,7 @@ from dash.dependencies import Input, Output
 from plot import create_scatter_plot
 from score import evalute_https_score, evalute_performance_score, evalute_trust_score, merge_df_results
 from layout import get_html_layout, make_dash_table
+
 
 # Configurazione server Flask
 STATIC_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static')
