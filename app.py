@@ -1,7 +1,11 @@
+# -*- coding: utf-8 -*-
 import os
 import flask
 import dash
 import pandas as pd
+
+import dash_html_components as html
+
 
 from dash.dependencies import Input, Output
 from plot import create_scatter_plot
@@ -56,7 +60,7 @@ plot_type = 'scatter3d'
 domain_plot = create_scatter_plot(x, y, z, size, color, xlabel, ylabel, zlabel, plot_type, text)
 starting_domain = '1cdbacoli.gov.it'
 domain_description = ""
-DOMAIN_IMG = "http://www.freepnglogos.com/uploads/a-letter-logo-png-6.png"
+DOMAIN_IMG = ""
 
 # Rendering del plot sulla pagina Html
 app.layout = get_html_layout(starting_domain,
@@ -70,7 +74,7 @@ app.layout = get_html_layout(starting_domain,
     [Input('chem_dropdown', 'value'),
      Input('charts_radio', 'value')])
 def highlight_domain(chem_dropdown_values, plot_type):
-    return create_scatter_plot(markers = chem_dropdown_values, plot_type = plot_type)
+    return create_scatter_plot(x, y, z, size, color, xlabel, ylabel, zlabel, plot_type, text)
 
 
 @app.callback(
@@ -102,8 +106,8 @@ def return_domain_name(hoverData):
             firstPoint = hoverData['points'][0]
             if 'pointNumber' in firstPoint:
                 point_number = firstPoint['pointNumber']
-                domain_name = str(domain_plot['data'][0]['text'][point_number]).strip()
-                return domain_name
+                #domain_name = str(FIGURE['data'][0]['text'][point_number]).strip()
+                return ""
 
 
 @app.callback(
@@ -138,7 +142,13 @@ def display_domain(hoverData):
     if row.empty:
         return
 
-    description = row['Domain'].iloc[0]
+    description = html.Div([
+        html.P("HTTPS SCORE: " + str(row['HTTPS Score'].iloc[0])),
+        html.P("PERFORMANCE SCORE: " + str(row['Performance Score'].iloc[0])),
+        html.P("TRUST SCORE: " + str(row['Trust Score'].iloc[0])),
+        html.P("TOT SCORE: " + str(row['Tot Score'].iloc[0])),
+    ], style={'margin-top': '15px'}),
+
     return description
 
 @app.server.route('/static/<resource>')

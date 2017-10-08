@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import dash_html_components as html
 import dash_core_components as dcc
 
@@ -6,16 +7,19 @@ def make_dash_table( selection, df ):
 
     df_subset = df.loc[df['Domain'].isin(selection)]
     table = []
+    table.append(html.Tr([html.Th('Dominio'), html.Th("HTTPS Score"), html.Th("Performance Score"), html.Th("Trust Score"), html.Th("Grado")]))
     for index, row in df_subset.iterrows():
         html_row = []
         for i in range(len(row)):
             if i == 0 or i == 6:
                 html_row.append( html.Td([ row[i] ]) )
-            elif i == 1:
-                html_row.append( html.Td([ html.A( href=row[i], children='Datasheet' )]))
             elif i == 5:
-                html_row.append( html.Td([ html.Img( src=row[i] )]))
-            elif i == 4:
+                html_row.append( html.Td([ html.Img( src=row[i], style={'margin': '0 auto', 'display': 'block', 'width': '50'} )]))
+            elif i == 1:
+                html_row.append( html.Td([ row[i] ]))
+            elif i == 2:
+                html_row.append( html.Td([ row[i] ]))
+            elif i == 3:
                 html_row.append( html.Td([ row[i] ]))
         table.append( html.Tr( html_row ) )
     return table
@@ -55,8 +59,8 @@ def get_html_layout(starting_domain,
     html.Div([
         html.Div([
             html.Div([
-                html.P('HOVER over a domain in the graph to the right to see its structure to the left.'),
-                html.P('SELECT a domain in the dropdown to add it to the domain candidates at the bottom.')
+                html.P('Passa il mouse su un dominio nel grafico per vedere i parametri di sicurezza sulla sinstra.'),
+                html.P('Seleziona i domini da menu per aggiungerli alla tabella in basso.')
             ], style={'margin-left': '10px'}),
             dcc.Dropdown(id='chem_dropdown',
                          multi=True,
@@ -104,6 +108,10 @@ def get_html_layout(starting_domain,
 
         ], className='nine columns', style=dict(textAlign='center')),
     ], className='row' ),
+
+    html.Div([
+        html.H3("Tabella domini")
+    ]),
 
     html.Div([
         html.Table(make_dash_table([starting_domain], df), id='table-element')
