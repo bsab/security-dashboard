@@ -3,10 +3,8 @@ import os
 import flask
 import dash
 import pandas as pd
-import logging
 
 import dash_html_components as html
-
 
 from dash.dependencies import Input, Output
 from plot import create_scatter_plot
