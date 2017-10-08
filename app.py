@@ -152,7 +152,7 @@ def display_domain(hoverData):
 @app.server.route('/static/<resource>')
 def serve_static(resource):
     """ Serve gli statici dalla cartella /static/ """
-    return flask.send_from_directory(STATIC_PATH, resource)
+    return flask.send_static_file(resource)
 
 # Aggiunta di file CSS esterni
 external_css = ["https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css",
