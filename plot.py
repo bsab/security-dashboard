@@ -53,15 +53,15 @@ def add_markers(figure_data,
 def create_scatter_plot(x, y, z, size, color, xlabel, ylabel, zlabel, plot_type, text, markers=[] ):
     """
 
-    :param x:
-    :param y:
-    :param z:
-    :param size:
-    :param color:
-    :param xlabel:
-    :param ylabel:
-    :param zlabel:
-    :param plot_type:
+    :param x: dataset asse X
+    :param y: dataset asse Y
+    :param z: dataset asse Z
+    :param size: dataset
+    :param color: gradiente di colori
+    :param xlabel: Label asse X
+    :param ylabel: Label asse Y
+    :param zlabel: Label asse Z
+    :param plot_type: tipo di grafico
     :param text:
     :param markers:
     :return:
