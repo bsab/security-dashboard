@@ -68,8 +68,8 @@ def evalute_performance_score(file_pageload_csv):
     # Creo il dataframe degli score per HTTPS
     df_score_performance = pd.DataFrame(pageload, columns=['Domain', 'Performance Score'])
 
-    print("-----------PERFORMANCE---------------")
-    print(df_score_performance)
+    #print("-----------PERFORMANCE---------------")
+    #print(df_score_performance)
     df_score_performance.to_csv("df_score_performance.csv", index=False)
 
     return df_score_performance
@@ -132,7 +132,7 @@ def merge_df_results(df_score_https, df_score_performance, df_trust_performance)
 
     df_res.to_csv("df_results.csv", index=False)
 
-    print("-----------RESULT---------------")
-    print(df_res)
+    #print("-----------RESULT---------------")
+    #print(df_res)
 
     return df_res
