@@ -6,6 +6,10 @@ Check out the [Live Demo](https://security-dashboard.herokuapp.com).
 Usage
 ----
 
+Open the dashboard in your web browser :
+
+ http://localhost/security-dashboard/
+
 
 Install on local
 -----
@@ -27,9 +31,9 @@ The add and update methods related to apis haven't been included, otherwise the 
 
 ## Authors
 
-[Sabatino Severino](https://about.me/the_sab), @bsab
+* [Sabatino Severino](https://about.me/the_sab), @bsab
 
-[Marco Izzo](https://github.com/marcoizzo), @marcoizzo
+* [Marco Izzo](https://github.com/marcoizzo), @marcoizzo
 
-[Francesco Amato](https://github.com/airciccio83), @airciccio83
+* [Francesco Amato](https://github.com/airciccio83), @airciccio83
 
