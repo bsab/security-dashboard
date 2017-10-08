@@ -17,16 +17,23 @@ server.secret_key = os.environ.get('secret_key', 'secret')
 # Import dei csv ottenuti dall'utility domain-scan
 #
 
-#1) import del csv relativo al test HTTPS (pshtt scanner)
+# 1) Importo il csv relativo al test HTTPS (pshtt scanner)
+# e calcolo un punteggio finale associato ad ogni dominio analizzato
+# in scala da 0 a 15
 df_score_https = evalute_https_score("csv/pshtt.csv")
 
-#2) import del csv relativo al test sulle performance (pageload scanner)
+# 2) Importo il csv relativo al test sulle performance (pageload scanner)
+# e calcolo un punteggio finale associato ad ogni dominio analizzato
+# in scala da 0 a 15
 df_score_performance = evalute_performance_score("csv/pageload.csv")
 
-#3) import del csv relativo al test sull'affidabilita' (trustymail scanner)
+#3) Importo il csv relativo al test sull'affidabilita' (trustymail scanner)
+# e calcolo un punteggio finale associato ad ogni dominio analizzato
+# in scala da 0 a 15
 df_trust_performance = evalute_trust_score("csv/trustymail.csv")
 
-#4)
+# 4) Unifico i risultati in unico DataFrame definendo un punteggio finale
+# in scala da 0 a 1500
 df_result = merge_df_results(df_score_https, df_score_performance, df_trust_performance)
 
 df = df_result
