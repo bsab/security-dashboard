@@ -1,12 +1,25 @@
 # Security-Dashboard #
 A dashboard that shows the status of security features on .gov.it websites
 
+Select a domain from the search bar or directly by clicking on the chart. Each domain has been assigned a score from A to F.
+
+The score calculation is based on 3 characteristics:
+- Security: guaranteed by the use of HTTPS or HTS protocol.
+- Performance: Analyzing the loading times for pages and assets.
+- Reliable: Verifing MX, SPF, and DMARC usage.
+
+The domain that gets the highest value in all three of these features can be considered a highly secure domain.
+
 Check out the [Live Demo](https://security-dashboard.herokuapp.com/security-dashboard).
+
+Requirements
+----
+Python 2.7
 
 Usage
 ----
 
-Open the dashboard in your web browser :
+Check [Live Demo](https://security-dashboard.herokuapp.com/security-dashboard) or open the dashboard in your web browser :
 
  http://localhost/security-dashboard/
 
@@ -25,9 +38,6 @@ Then:
 
     python app.py
 
-## To Do
-
-The add and update methods related to apis haven't been included, otherwise the current API is fully implemented (at least as of June 2017).
 
 ## Authors
 
@@ -36,4 +46,5 @@ The add and update methods related to apis haven't been included, otherwise the 
 * [Marco Izzo](https://github.com/marcoizzo), @marcoizzo
 
 * [Francesco Amato](https://github.com/airciccio83), @airciccio83
+
 
