@@ -3,7 +3,6 @@ import os
 import flask
 import dash
 import pandas as pd
-import logging
 
 import dash_html_components as html
 
