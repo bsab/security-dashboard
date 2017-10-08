@@ -130,8 +130,7 @@ def merge_df_results(df_score_https, df_score_performance, df_trust_performance)
                                                             np.where(df_res['Tot Score'] >= 300, '/static/img/CircleE.png',
                                                                      '/static/img/CircleF.png')))))
 
-    df_res.to_csv("df_results.csv", index=False)
-
+    #df_res.to_csv("df_results.csv", index=False)
     #print("-----------RESULT---------------")
     #print(df_res)
 

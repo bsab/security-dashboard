@@ -2,7 +2,8 @@ import dash_html_components as html
 import dash_core_components as dcc
 
 def make_dash_table( selection, df ):
-    ''' Return a dash defintion of an HTML table for a Pandas dataframe '''
+    """ Return a dash defintion of an HTML table for a Pandas dataframe """
+
     df_subset = df.loc[df['Domain'].isin(selection)]
     table = []
     for index, row in df_subset.iterrows():
@@ -69,11 +70,8 @@ def get_html_layout(starting_domain,
 
     html.Div([
         html.Div([
-
             html.P("GRADO DI SICUREZZA", style={'text-align': 'center', 'fontSize': '20px', 'margin-top': '10px'}),
-
             html.Img(id='chem_img', src=score_sticker, style={'margin': '0 auto', 'display': 'block', 'width': '100'}),
-
             html.A(starting_domain,
                    id='chem_name',
                    href="https://www.gov.it",
@@ -105,8 +103,6 @@ def get_html_layout(starting_domain,
                       figure=FIGURE ),
 
         ], className='nine columns', style=dict(textAlign='center')),
-
-
     ], className='row' ),
 
     html.Div([

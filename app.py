@@ -4,6 +4,7 @@ import dash
 import pandas as pd
 
 from dash.dependencies import Input, Output
+from plot import create_scatter_plot
 from score import evalute_https_score, evalute_performance_score, evalute_trust_score, merge_df_results
 from layout import get_html_layout, make_dash_table
 
@@ -36,162 +37,33 @@ df_trust_performance = evalute_trust_score("csv/trustymail.csv")
 # in scala da 0 a 1500
 df_result = merge_df_results(df_score_https, df_score_performance, df_trust_performance)
 
-df = df_result
+#
+# Definisco i parametri per la configurazione del grafico Dash
+#
+x=df_result['HTTPS Score']
+y=df_result['Performance Score']
+z=df_result['Trust Score']
+size=df_result['Tot Score']
+color=df_result['Tot Score']
+text = df_result['Domain']
 
-def add_markers( figure_data, domains, plot_type = 'scatter3d' ):
-    indices = []
-    domain_data = figure_data[0]
-    for m in domains:
-        hover_text = domain_data['text']
-        for i in range(len(hover_text)):
-            if m == hover_text[i]:
-                indices.append(i)
+xlabel = 'Sicurezza'
+ylabel = 'Performance'
+zlabel = 'Trust mail'
+plot_type = 'scatter3d'
 
-    if plot_type == 'histogram2d':
-        plot_type = 'scatter'
-
-    traces = []
-    for point_number in indices:
-        trace = dict(
-            x = [ domain_data['x'][point_number] ],
-            y = [ domain_data['y'][point_number] ],
-            marker = dict(
-                color = 'red',
-                size = 16,
-                opacity = 0.6,
-                symbol = 'cross'
-            ),
-            type = plot_type
-        )
-
-        if plot_type == 'scatter3d':
-            trace['z'] = [ domain_data['z'][point_number] ]
-
-        traces.append(trace)
-
-    return traces
-
-
-BACKGROUND = 'rgb(230, 230, 230)'
-COLORSCALE = [[0, "#4CAF50"], [0.25, "#7FC049"],
-               [0.5, "#C9D144"], [0.75, "#E29A3E"], [1, "#F44336"] ]
-
-def create_scatter_plot(
-        x=df['HTTPS Score'],
-        y=df['Performance Score'],
-        z=df['Trust Score'],
-        size=df['Tot Score'],
-        color=df['Tot Score'],
-        xlabel = 'Sicurezza',
-        ylabel = 'Performance',
-        zlabel = 'Trust mail',
-        plot_type = 'scatter3d',
-        markers = [] ):
-
-    def axis_template_3d( title, type='linear' ):
-        return dict(
-            showbackground = True,
-            backgroundcolor = BACKGROUND,
-            gridcolor = 'rgb(255, 255, 255)',
-            title = title,
-            type = type,
-            zerolinecolor = 'rgb(255, 255, 255)'
-        )
-
-    def axis_template_2d(title):
-        return dict(
-            xgap = 10, ygap = 10,
-            backgroundcolor = BACKGROUND,
-            gridcolor = 'rgb(255, 255, 255)',
-            title = title,
-            zerolinecolor = 'rgb(255, 255, 255)',
-            color = '#444'
-        )
-
-    def blackout_axis( axis ):
-        axis['showgrid'] = False
-        axis['zeroline'] = False
-        axis['color']  = 'white'
-        return axis
-
-    data = [ dict(
-        x = x,
-        y = y,
-        z = z,
-        mode = 'markers',
-        marker = dict(
-            colorscale = COLORSCALE,
-            colorbar = dict( title = "Grado di<br>Sicurezza" ),
-            line = dict( color = '#444' ),
-            reversescale = True,
-            sizeref = 45,
-            sizemode = 'diameter',
-            opacity = 0.7,
-            size = size,
-            color = color,
-        ),
-        text = df['Domain'],
-        type = plot_type,
-    ) ]
-
-    layout = dict(
-        font = dict( family = 'Raleway' ),
-        hovermode = 'closest',
-        margin = dict( r=20, t=0, l=0, b=0 ),
-        showlegend = False,
-        scene = dict(
-            xaxis = axis_template_3d( xlabel ),
-            yaxis = axis_template_3d( ylabel ),
-            zaxis = axis_template_3d( zlabel, 'log' ),
-            camera = dict(
-                up=dict(x=0, y=0, z=1),
-                center=dict(x=0, y=0, z=0),
-                eye=dict(x=0.08, y=2.2, z=0.08)
-            )
-        )
-    )
-
-    if plot_type in ['histogram2d', 'scatter']:
-        layout['xaxis'] = axis_template_2d(xlabel)
-        layout['yaxis'] = axis_template_2d(ylabel)
-        layout['plot_bgcolor'] = BACKGROUND
-        layout['paper_bgcolor'] = BACKGROUND
-        del layout['scene']
-        del data[0]['z']
-
-    if plot_type == 'histogram2d':
-        # Scatter plot overlay on 2d Histogram
-        data[0]['type'] = 'scatter'
-        data.append( dict(
-            x = x,
-            y = y,
-            type = 'histogram2d',
-            colorscale = 'Greys',
-            showscale = False
-        ) )
-        layout['plot_bgcolor'] = 'black'
-        layout['paper_bgcolor'] = 'black'
-        layout['xaxis'] = blackout_axis(layout['xaxis'])
-        layout['yaxis'] = blackout_axis(layout['yaxis'])
-        layout['font']['color'] = 'white'
-
-    if len(markers) > 0:
-        data = data + add_markers( data, markers, plot_type = plot_type )
-
-    return dict( data=data, layout=layout )
-
-
-
-FIGURE = create_scatter_plot()
-STARTING_DOMAIN = '1cdbacoli.gov.it'
-DOMAIN_DESCRIPTION = ""
+# Plotting del grafico relativo alla lista dei domini importati
+domain_plot = create_scatter_plot(x, y, z, size, color, xlabel, ylabel, zlabel, plot_type, text)
+starting_domain = '1cdbacoli.gov.it'
+domain_description = ""
 DOMAIN_IMG = "http://www.freepnglogos.com/uploads/a-letter-logo-png-6.png"
 
-app.layout = get_html_layout(STARTING_DOMAIN,
+# Rendering del plot sulla pagina Html
+app.layout = get_html_layout(starting_domain,
                              DOMAIN_IMG,
-                             DOMAIN_DESCRIPTION,
-                             FIGURE,
-                             df)
+                             domain_description,
+                             domain_plot,
+                             df_result)
 
 @app.callback(
     Output('clickable-graph', 'figure'),
@@ -205,19 +77,19 @@ def highlight_domain(chem_dropdown_values, plot_type):
     Output('table-element', 'children'),
     [Input('chem_dropdown', 'value')])
 def update_table(chem_dropdown_value):
-    table = make_dash_table( chem_dropdown_value, df )
+    table = make_dash_table( chem_dropdown_value, df_result)
     return table
 
 
 def dfRowFromHover( hoverData ):
-    ''' Returns row for hover point as a Pandas Series '''
+    """ Returns row for hover point as a Pandas Series """
     if hoverData is not None:
         if 'points' in hoverData:
             firstPoint = hoverData['points'][0]
             if 'pointNumber' in firstPoint:
                 point_number = firstPoint['pointNumber']
-                domain_name = str(FIGURE['data'][0]['text'][point_number]).strip()
-                return df.loc[df['Domain'] == domain_name]
+                domain_name = str(domain_plot['data'][0]['text'][point_number]).strip()
+                return df_result.loc[df_result['Domain'] == domain_name]
     return pd.Series()
 
 
@@ -230,7 +102,7 @@ def return_domain_name(hoverData):
             firstPoint = hoverData['points'][0]
             if 'pointNumber' in firstPoint:
                 point_number = firstPoint['pointNumber']
-                domain_name = str(FIGURE['data'][0]['text'][point_number]).strip()
+                domain_name = str(domain_plot['data'][0]['text'][point_number]).strip()
                 return domain_name
 
 
@@ -241,7 +113,6 @@ def return_href(hoverData):
     row = dfRowFromHover(hoverData)
     if row.empty:
         return
-    #datasheet_link = row['PAGE'].iloc[0]
     datasheet_link = "http://" + row['Domain'].iloc[0]
     return datasheet_link
 
@@ -279,10 +150,8 @@ external_css = ["https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.
                 "//fonts.googleapis.com/css?family=Dosis:Medium",
                 "https://cdn.rawgit.com/plotly/dash-app-stylesheets/0e463810ed36927caf20372b6411690692f94819/dash-security-dashboard-demo-stylesheet.css"]
 
-
 for css in external_css:
     app.css.append_css({"external_url": css})
-
 
 if __name__ == '__main__':
     app.run_server()
