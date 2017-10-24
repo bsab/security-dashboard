@@ -129,6 +129,7 @@ def create_scatter_plot(x, y, z, size, color, xlabel, ylabel, zlabel, plot_type,
         )
     )
 
+    '''
     if plot_type in ['histogram2d', 'scatter']:
         layout['xaxis'] = axis_template_2d(xlabel)
         layout['yaxis'] = axis_template_2d(ylabel)
@@ -152,8 +153,9 @@ def create_scatter_plot(x, y, z, size, color, xlabel, ylabel, zlabel, plot_type,
         layout['xaxis'] = blackout_axis(layout['xaxis'])
         layout['yaxis'] = blackout_axis(layout['yaxis'])
         layout['font']['color'] = 'white'
+    '''
 
     if len(markers) > 0:
-        data = data + add_markers( data, markers, plot_type = plot_type )
+        data = data + add_markers(data, markers, plot_type=plot_type)
 
     return dict( data=data, layout=layout )

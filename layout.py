@@ -3,9 +3,16 @@ import dash_html_components as html
 import dash_core_components as dcc
 
 def make_dash_table( selection, df ):
+    print "make_dash_table--->", selection
     """ Return a dash defintion of an HTML table for a Pandas dataframe """
 
-    df_subset = df.loc[df['Domain'].isin(selection)]
+    try:
+        df_subset = df.loc[df['Domain'].isin(selection)]
+    except:
+        tmp = []
+        tmp.append(str(selection))
+        df_subset = df.loc[df['Domain'].isin(tmp)]
+
     table = []
     table.append(html.Tr([html.Th('Dominio'), html.Th("HTTPS Score"), html.Th("Performance Score"), html.Th("Trust Score"), html.Th("Grado")]))
     for index, row in df_subset.iterrows():
@@ -22,6 +29,8 @@ def make_dash_table( selection, df ):
             elif i == 3:
                 html_row.append( html.Td([ row[i] ]))
         table.append( html.Tr( html_row ) )
+
+    print table
     return table
 
 
@@ -70,18 +79,33 @@ def get_html_layout(starting_domain,
 
                 ]),
             ], style={'margin-left': '10px'}),
+        ], className='row'),
 
-
+        html.Hr(style={'margin': '0', 'margin-bottom': '5'}),
+        html.Div([
+            # Dropdown di ricerca
+            html.Div([
+                html.Label('Cerca:'),
             dcc.Dropdown(id='chem_dropdown',
-                         multi=True,
+                         # multi=True,
                          value=[starting_domain],
                          options=[{'label': i, 'value': i} for i in df['Domain'].tolist()]),
-            ], className='twelve columns' )
+            ], className='twelve columns')
+        ],
+            className='six columns',
 
-    ], className='row' ),
+        ),
+
+        html.Div([
+            html.Table(make_dash_table([starting_domain], df), id='table-element'),
+        ],
+            className='two columns',
+        ),
+    ]),
+
 
     # Row 2: Hover Panel and Graph
-
+        html.Hr(style={'margin': '0', 'margin-bottom': '5'}),
     html.Div([
         html.Div([
             html.P("GRADO DI SICUREZZA", style={'text-align': 'center', 'fontSize': '20px', 'margin-top': '10px'}),
@@ -103,9 +127,9 @@ def get_html_layout(starting_domain,
             dcc.RadioItems(
                 id = 'charts_radio',
                 options=[
-                    dict( label='Grafico 3D', value='scatter3d' ),
-                    dict( label='Grafico 2D', value='scatter' ),
-                    dict( label='Istogramma', value='histogram2d' ),
+                    dict(label='Visualizzazione 3D', value='scatter3d'),
+                    dict(label='Visualizzazione 2D', value='scatter'),
+                    # dict( label='Istogramma', value='histogram2d' ),
                 ],
                 labelStyle = dict(display='inline'),
                 value='scatter3d'
@@ -118,14 +142,5 @@ def get_html_layout(starting_domain,
 
         ], className='nine columns', style=dict(textAlign='center')),
     ], className='row' ),
-
-    html.Div([
-        html.H3("Tabella domini")
-    ]),
-
-    html.Div([
-        html.Table(make_dash_table([starting_domain], df), id='table-element')
-    ])
-
 ], className='container')
 

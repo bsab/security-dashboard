@@ -16,6 +16,7 @@ from layout import get_html_layout, make_dash_table
 STATIC_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static')
 server = flask.Flask('security-dashboard')
 app = dash.Dash('security-dashboard', server=server, url_base_pathname='/security-dashboard/', csrf_protect=False)
+
 server.secret_key = os.environ.get('secret_key', 'secret')
 
 #
@@ -74,18 +75,21 @@ app.layout = get_html_layout(starting_domain,
     [Input('chem_dropdown', 'value'),
      Input('charts_radio', 'value')])
 def highlight_domain(chem_dropdown_values, plot_type):
+    print "**CALLBACK::highlight_domain**"
     return create_scatter_plot(x, y, z, size, color, xlabel, ylabel, zlabel, plot_type, text)
 
 @app.callback(
     Output('table-element', 'children'),
     [Input('chem_dropdown', 'value')])
 def update_table(chem_dropdown_value):
+    print "**CALLBACK::update_table**"
     """ Modifica la tabella con i domini selezionati """
     table = make_dash_table( chem_dropdown_value, df_result)
     return table
 
 
 def dfRowFromHover( hoverData ):
+    print "**CALLBACK::dfRowFromHover**"
     """ Ritorna il dominio in hover """
     if hoverData is not None:
         if 'points' in hoverData:
@@ -100,6 +104,7 @@ def dfRowFromHover( hoverData ):
     Output('chem_name', 'children'),
     [Input('clickable-graph', 'hoverData')])
 def return_domain_name(hoverData):
+    print "**CALLBACK::return_domain_name**"
     """ Ritorna il dominio in hover """
     if hoverData is not None:
         if 'points' in hoverData:
@@ -110,9 +115,10 @@ def return_domain_name(hoverData):
                 return ""
 
 @app.callback(
-    dash.dependencies.Output('chem_name', 'href'),
-    [dash.dependencies.Input('clickable-graph', 'hoverData')])
+    Output('chem_name', 'href'),
+    [Input('clickable-graph', 'hoverData')])
 def return_href(hoverData):
+    print "**CALLBACK::return_href**"
     """ Ritorna il link del dominio in hover """
     row = dfRowFromHover(hoverData)
     if row.empty:
@@ -124,6 +130,7 @@ def return_href(hoverData):
     Output('chem_img', 'src'),
     [Input('clickable-graph', 'hoverData')])
 def display_image(hoverData):
+    print "**CALLBACK::display_image**"
     """ Ritorna l'immagine dello score corrispondente al dominio in hover """
     row = dfRowFromHover(hoverData)
     if row.empty:
@@ -136,6 +143,7 @@ def display_image(hoverData):
     Output('chem_desc', 'children'),
     [Input('clickable-graph', 'hoverData')])
 def display_domain(hoverData):
+    print "**CALLBACK::display_domain** -->", hoverData
     """ Ritorna il layout HTML dei parametri del dominio in hover"""
     row = dfRowFromHover(hoverData)
     if row.empty:
@@ -164,4 +172,5 @@ for css in external_css:
     app.css.append_css({"external_url": css})
 
 if __name__ == '__main__':
+    app.title = 'security-dashboard'
     app.run_server()
