@@ -53,7 +53,7 @@ text = df_result['Domain']
 
 xlabel = 'Sicurezza'
 ylabel = 'Performance'
-zlabel = 'Trust mail'
+zlabel = 'Affidabilita'
 plot_type = 'scatter3d'
 
 # Plotting del grafico relativo alla lista dei domini importati
