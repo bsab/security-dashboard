@@ -9,7 +9,7 @@ import dash_html_components as html
 from dash.dependencies import Input, Output
 from plot import create_scatter_plot
 from score import evalute_https_score, evalute_performance_score, evalute_trust_score, merge_df_results
-from layout import get_html_layout, make_dash_table
+from layout import get_html_layout, make_dash_table, get_domain_classification_info
 
 
 # Configurazione server Flask
@@ -87,6 +87,14 @@ def update_table(chem_dropdown_value):
     table = make_dash_table( chem_dropdown_value, df_result)
     return table
 
+@app.callback(
+    Output('domain-info-element', 'children'),
+    [Input('chem_dropdown', 'value')])
+def update_domain_info(chem_dropdown_value):
+    print "**CALLBACK::update_domain_info**"
+    """ Modifica la tabella con i domini selezionati """
+    table = get_domain_classification_info( chem_dropdown_value, df_result)
+    return table
 
 def dfRowFromHover( hoverData ):
     print "**CALLBACK::dfRowFromHover**"
