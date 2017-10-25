@@ -172,8 +172,8 @@ h1, h2, h3, h4, h5, h6 {
 
 @media (min-width: 0px) {
     .content {
-        margin-left: 20px;
-        margin-right: 20px;
+        margin-left: 5px;
+        margin-right: 5px;
         margin-top: 20px;
         margin-bottom: 40px;
     }
@@ -225,6 +225,6 @@ h1, h2, h3, h4, h5, h6 {
 @media (min-width: 900px) {
     .container-width {
         width: 80%;
-        max-width: 960px;
+        max-width: 95%;
     }
 }

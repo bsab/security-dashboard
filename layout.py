@@ -64,34 +64,9 @@ def get_html_layout(starting_domain,
                     domain_info,
                     FIGURE,
                     df):
-    header = html.Div(
-        className='header',
-        children=html.Div(
-            className='container-width',
-            style={'height': '100%'},
-            children=[
-                html.A(html.Img(
-                    src="https://avatars1.githubusercontent.com/u/15377824?v=4&s=200",
-                    className="logo"
-                ), href='#', className="logo-link"),
 
-                html.Div(className="links", children=[
-                    html.A('Come Funziona', className="link", href="#"),
-                    html.A('Cerca', className="link active", href="#"),
-                    html.A('Help', className="link", href="#"),
-                ])
-            ]
-        )
-    )
 
     return html.Div([
-        html.Meta(name='viewport', content='width=device-width, initial-scale=1.0'),
-        html.Meta(
-            name='description',
-            content=('Security Dashboard '
-                     'A dashboard that shows the status of security features on .gov.it websites')
-        ),
-        header,
         html.Div([
             html.H2('Security Dashboard',
                     style={
