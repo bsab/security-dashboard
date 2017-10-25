@@ -79,28 +79,13 @@ def highlight_domain(chem_dropdown_values, plot_type):
     return create_scatter_plot(x, y, z, size, color, xlabel, ylabel, zlabel, plot_type, text)
 
 @app.callback(
-    # Output('table-element', 'children'),
     Output('domain-info-element', 'children'),
     [Input('chem_dropdown', 'value')])
-def update_table(chem_dropdown_value):
-    print "**CALLBACK::update_table**"
-    """ Modifica la tabella con i domini selezionati """
+def update_domain_info_classification(chem_dropdown_value):
+    """ Aggiorna le informazione riguardo la classificazione
+     del dominio selezionato"""
 
     return get_domain_classification_info(chem_dropdown_value, df_result)
-    # table = make_dash_table( chem_dropdown_value, df_result)
-    # return table
-
-
-'''
-@app.callback(
-    Output('domain-info-element', 'children'),
-    [Input('chem_dropdown', 'value')])
-def update_domain_info(chem_dropdown_value):
-    print "**CALLBACK::update_domain_info**"
-    """ Modifica la tabella con i domini selezionati """
-    table = get_domain_classification_info( chem_dropdown_value, df_result)
-    return table
-'''
 
 def dfRowFromHover( hoverData ):
     print "**CALLBACK::dfRowFromHover**"
@@ -175,10 +160,6 @@ external_css = ["https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.
 for css in external_css:
     app.css.append_css({"external_url": css})
 
-# Aggiunta script esterni
-app.scripts.append_script({
-    "external_url": "https://rawgit.com/bsab/security-dashboard/wise-turtle/static/my-event.js"
-})
 
 if __name__ == '__main__':
     app.title = 'security-dashboard'

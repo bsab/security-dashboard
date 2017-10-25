@@ -12,6 +12,7 @@ def get_domain_classification_info( selection, df ):
         tmp.append(str(selection))
         df_subset = df.loc[df['Domain'].isin(tmp)]
 
+    print "df_subset--------->", df_subset
     domain_info = {}
     for index, row in df_subset.iterrows():
         for i in range(len(row)):
@@ -26,12 +27,19 @@ def get_domain_classification_info( selection, df ):
             elif i == 3:
                 domain_info['Trust'] = row[i]
 
+    print "domain_info--------->", domain_info
+
     return [html.Div([
+        # html.Iframe(src="www." + domain_info['Domain']),
+        html.Div([
+            html.Iframe(id="screenshot",
+                        src="http://www." + domain_info['Domain'],
+                        sandbox="allow-same-origin",
+                        style={'border': 'none', 'width': '100%', 'height': 500})
+        ], className="eight columns"),
 
         html.Img(id='chem_img', src=domain_info['Sticker'],
                  style={'margin': '0 auto', 'display': 'block', 'width': '100'}),
-
-        html.P('test', id='performance_slider'),
 
         html.Label('HTTPS:'),
             dcc.Slider(
@@ -112,28 +120,21 @@ def get_html_layout(starting_domain,
 
         html.Div(
             [
-            html.Hr(style={'margin': '0', 'margin-bottom': '5'}),
             html.Div([
                 html.Div([
                     html.Label('Cerca:'),
                     dcc.Dropdown(id='chem_dropdown',
-                                 # multi=True,
                                  value=[starting_domain],
                                  options=[{'label': i, 'value': i} for i in df['Domain'].tolist()]),
                 ],
                     className='six columns',
                 ),
                 html.Div([
-                    # html.Img(id='chem_img', src=score_sticker,
-                    #         style={'margin': '0 auto', 'display': 'block', 'width': '100'}),
                     html.A(starting_domain,
                            id='chem_name',
                            href="https://www.gov.it",
                            target="_blank",
                            style={'text-align': 'center', 'display': 'block'}),
-                    html.P(domain_info,
-                           id='chem_desc',
-                           style=dict(maxHeight='400px', fontSize='12px')),
 
                 ],
                     className='two columns',
@@ -147,40 +148,8 @@ def get_html_layout(starting_domain,
                 className='row',
                 style={'margin-bottom': '10'}
             ),
-            html.Div([
-                dcc.Graph(id='iv_surface', style={'max-height': '600', 'height': '60vh'}),
-            ],
-                className='row',
-                style={'margin-bottom': '20'}
-            ),
-            html.Div([
-                html.Div([
-                    dcc.Graph(id='iv_heatmap', style={'max-height': '350', 'height': '35vh'}),
-                ],
-                    className='five columns'
-                ),
-                html.Div([
-                    dcc.Graph(id='iv_scatter', style={'max-height': '350', 'height': '35vh'}),
-                ],
-                    className='seven columns'
-                )
-            ],
-                className='row'
-            ),
-            # Temporary hack for live dataframe caching
-            # 'hidden' set to 'loaded' triggers next callback
-            html.P(
-                hidden='',
-                id='raw_container',
-                style={'display': 'none'}
-            ),
-            html.P(
-                hidden='',
-                id='filtered_container',
-                style={'display': 'none'}
-            )
         ],
-         className='container'
+            className='row'
         )
     ]),
 
@@ -189,39 +158,23 @@ def get_html_layout(starting_domain,
     html.Hr(style={'margin': '0', 'margin-bottom': '5'}),
     html.Div([
         html.Div([
-            html.P("GRADO DI SICUREZZA", style={'text-align': 'center', 'fontSize': '20px', 'margin-top': '10px'}),
-            #html.Img(id='chem_img', src=score_sticker, style={'margin': '0 auto', 'display': 'block', 'width': '100'}),
-            #html.A(starting_domain,
-            #       id='chem_name',
-            #       href="https://www.gov.it",
-            #       target="_blank",
-            #       style={'text-align': 'center', 'display': 'block'}),
-
-            #html.P(domain_info,
-            #       id='chem_desc',
-            #       style=dict( maxHeight='400px', fontSize='12px' )),
-
-        ], className='three columns', style=dict(height='300px') ),
-
-        html.Div([
-
             dcc.RadioItems(
-                id = 'charts_radio',
+                id='charts_radio',
                 options=[
-                    dict(label='Visualizzazione 3D', value='scatter3d'),
                     dict(label='Visualizzazione 2D', value='scatter'),
+                    dict(label='Visualizzazione 3D', value='scatter3d'),
                     # dict( label='Istogramma', value='histogram2d' ),
                 ],
                 labelStyle = dict(display='inline'),
-                value='scatter3d'
+                value='scatter'
             ),
 
             dcc.Graph(id='clickable-graph',
-                      style=dict(width='700px'),
+                      style=dict(width='90%'),
                       hoverData=dict( points=[dict(pointNumber=0)] ),
                       figure=FIGURE ),
 
-        ], className='nine columns', style=dict(textAlign='center')),
+        ], style=dict(textAlign='center')),
     ], className='row' ),
 ], className='container')
 
