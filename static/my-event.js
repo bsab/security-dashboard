@@ -1,4 +1,8 @@
 console.log("*******************")
+console.log("*******************")
+console.log("*******************")
+console.log("*******************")
+console.log("*******************")
 
 var myId = 'my-container'
 var body = document.getElementsByTagName('body')[0]
