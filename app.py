@@ -9,7 +9,7 @@ import dash_html_components as html
 from dash.dependencies import Input, Output
 from plot import create_scatter_plot
 from score import evalute_https_score, evalute_performance_score, evalute_trust_score, merge_df_results
-from layout import get_html_layout, make_dash_table, get_domain_classification_info
+from layout import get_html_layout, get_domain_classification_info
 
 
 # Configurazione server Flask
@@ -79,14 +79,19 @@ def highlight_domain(chem_dropdown_values, plot_type):
     return create_scatter_plot(x, y, z, size, color, xlabel, ylabel, zlabel, plot_type, text)
 
 @app.callback(
-    Output('table-element', 'children'),
+    # Output('table-element', 'children'),
+    Output('domain-info-element', 'children'),
     [Input('chem_dropdown', 'value')])
 def update_table(chem_dropdown_value):
     print "**CALLBACK::update_table**"
     """ Modifica la tabella con i domini selezionati """
-    table = make_dash_table( chem_dropdown_value, df_result)
-    return table
 
+    return get_domain_classification_info(chem_dropdown_value, df_result)
+    # table = make_dash_table( chem_dropdown_value, df_result)
+    # return table
+
+
+'''
 @app.callback(
     Output('domain-info-element', 'children'),
     [Input('chem_dropdown', 'value')])
@@ -95,6 +100,7 @@ def update_domain_info(chem_dropdown_value):
     """ Modifica la tabella con i domini selezionati """
     table = get_domain_classification_info( chem_dropdown_value, df_result)
     return table
+'''
 
 def dfRowFromHover( hoverData ):
     print "**CALLBACK::dfRowFromHover**"
@@ -147,28 +153,18 @@ def display_image(hoverData):
     return img_src
 
 
-@app.callback(
-    Output('chem_desc', 'children'),
-    [Input('clickable-graph', 'hoverData')])
-def display_domain(hoverData):
-    print "**CALLBACK::display_domain** -->", hoverData
-    """ Ritorna il layout HTML dei parametri del dominio in hover"""
-    row = dfRowFromHover(hoverData)
-    if row.empty:
-        return
-    description = html.Div([
-        html.P("HTTPS SCORE: " + str(row['HTTPS Score'].iloc[0])),
-        html.P("PERFORMANCE SCORE: " + str(row['Performance Score'].iloc[0])),
-        html.P("TRUST SCORE: " + str(row['Trust Score'].iloc[0])),
-        html.P("TOT SCORE: " + str(row['Tot Score'].iloc[0])),
-    ], style={'margin-top': '15px'}),
-
-    return description
-
 @app.server.route('/static/<resource>')
 def serve_static(resource):
     """ Serve gli statici dalla cartella /static/ """
     return flask.send_static_file(resource)
+
+
+@app.server.route('/static/<filename>.js')
+def serve_script(filename):
+    print(('serving {}'.format(filename)))
+    if filename not in ['my-event']:
+        raise Exception('"{}" is excluded from the allowed static files'.format(filename))
+    return flask.send_from_directory(os.getcwd(), '{}.js'.format(filename))
 
 # Aggiunta di file CSS esterni
 external_css = ["https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css",
@@ -178,6 +174,11 @@ external_css = ["https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.
 
 for css in external_css:
     app.css.append_css({"external_url": css})
+
+# Aggiunta script esterni
+app.scripts.append_script({
+    "external_url": "/static/my-event.js"
+})
 
 if __name__ == '__main__':
     app.title = 'security-dashboard'

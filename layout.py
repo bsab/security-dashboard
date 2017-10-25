@@ -2,39 +2,7 @@
 import dash_html_components as html
 import dash_core_components as dcc
 
-def make_dash_table( selection, df ):
-    print "make_dash_table--->", selection
-    """ Return a dash defintion of an HTML table for a Pandas dataframe """
-
-    try:
-        df_subset = df.loc[df['Domain'].isin(selection)]
-    except:
-        tmp = []
-        tmp.append(str(selection))
-        df_subset = df.loc[df['Domain'].isin(tmp)]
-
-    table = []
-    table.append(html.Tr([html.Th('Dominio'), html.Th("HTTPS Score"), html.Th("Performance Score"), html.Th("Trust Score"), html.Th("Grado")]))
-    for index, row in df_subset.iterrows():
-        html_row = []
-        for i in range(len(row)):
-            if i == 0 or i == 6:
-                html_row.append( html.Td([ row[i] ]) )
-            elif i == 5:
-                html_row.append( html.Td([ html.Img( src=row[i], style={'margin': '0 auto', 'display': 'block', 'width': '50'} )]))
-            elif i == 1:
-                html_row.append( html.Td([ row[i] ]))
-            elif i == 2:
-                html_row.append( html.Td([ row[i] ]))
-            elif i == 3:
-                html_row.append( html.Td([ row[i] ]))
-        table.append( html.Tr( html_row ) )
-
-    print table
-    return table
-
 def get_domain_classification_info( selection, df ):
-    print "get_domain_classification_info--->", df
     """  """
 
     try:
@@ -44,24 +12,40 @@ def get_domain_classification_info( selection, df ):
         tmp.append(str(selection))
         df_subset = df.loc[df['Domain'].isin(tmp)]
 
-    print "df_subset['Domain']--->", df_subset['Domain']
+    domain_info = {}
+    for index, row in df_subset.iterrows():
+        for i in range(len(row)):
+            if i == 0 or i == 6:
+                domain_info['Domain'] = row[i]
+            elif i == 5:
+                domain_info['Sticker'] = row[i]
+            elif i == 1:
+                domain_info['HTTPS'] = row[i]
+            elif i == 2:
+                domain_info['Performance'] = row[i]
+            elif i == 3:
+                domain_info['Trust'] = row[i]
 
     return [html.Div([
+
+        html.Img(id='chem_img', src=domain_info['Sticker'],
+                 style={'margin': '0 auto', 'display': 'block', 'width': '100'}),
+
             html.Label('HTTPS:'),
             dcc.Slider(
-                id='price_slider',
+                id='https_slider',
                 min=0,
                 max=15,
-                value=5,
+                value=domain_info['HTTPS'],
             ),
         ]),
         html.Div([
             html.Label('Performance:'),
             dcc.Slider(
-                id='volume_slider',
+                id='performance_slider',
                 min=0,
                 max=10,
-                value=1,
+                value=domain_info['Performance'],
             )
         ]),
         html.Div([
@@ -70,7 +54,7 @@ def get_domain_classification_info( selection, df ):
                 id='trust_slider',
                 min=0,
                 max=10,
-                value=1,
+                value=domain_info['Trust'],
             )
         ])]
 
@@ -138,8 +122,8 @@ def get_html_layout(starting_domain,
                     className='six columns',
                 ),
                 html.Div([
-                    html.Img(id='chem_img', src=score_sticker,
-                             style={'margin': '0 auto', 'display': 'block', 'width': '100'}),
+                    # html.Img(id='chem_img', src=score_sticker,
+                    #         style={'margin': '0 auto', 'display': 'block', 'width': '100'}),
                     html.A(starting_domain,
                            id='chem_name',
                            href="https://www.gov.it",
@@ -195,11 +179,7 @@ def get_html_layout(starting_domain,
             )
         ],
          className='container'
-    ),
-        html.Div([
-            html.Table(make_dash_table([starting_domain], df), id='table-element'),
-        ]
-        ),
+        )
     ]),
 
 
