@@ -5,8 +5,8 @@ newNode.setAttribute('id', myId);
 body.appendChild(newNode);
 console.log(body)
 
-window.document.onload = function (e) {
-    console.log('test on change');
+window.onload = function (e) {
+    alert("onload!!!")
     document.getElementById("performance_slider").addEventListener("change", function () {
         alert("ciao")
         var myElement = document.getElementById(myId);
