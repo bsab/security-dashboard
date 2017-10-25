@@ -3,6 +3,7 @@ var body = document.getElementsByTagName('body')[0]
 var newNode = document.createElement('div');
 newNode.setAttribute('id', myId);
 body.appendChild(newNode);
+console.log(body)
 
 console.log('test on change');
 document.getElementById("performance_slider").addEventListener("change", function () {
