@@ -9,7 +9,7 @@ import dash_html_components as html
 from dash.dependencies import Input, Output
 from plot import create_scatter_plot
 from score import evalute_https_score, evalute_performance_score, evalute_trust_score, merge_df_results
-from layout import get_html_layout, get_domain_classification_info
+from layout import get_html_layout, get_domain_classification_info, get_domain_preview
 
 
 # Configurazione server Flask
@@ -70,6 +70,34 @@ app.layout = get_html_layout(starting_domain,
                              domain_plot,
                              df_result)
 
+
+def get_domain_dict(df, selection):
+    domain_info = {}
+
+    try:
+        df_subset = df.loc[df['Domain'].isin(selection)]
+    except:
+        tmp = []
+        tmp.append(str(selection))
+        df_subset = df.loc[df['Domain'].isin(tmp)]
+
+    print "df_subset--------->", df_subset
+    for index, row in df_subset.iterrows():
+        for i in range(len(row)):
+            if i == 0 or i == 6:
+                domain_info['Domain'] = row[i]
+            elif i == 5:
+                domain_info['Sticker'] = row[i]
+            elif i == 1:
+                domain_info['HTTPS'] = row[i]
+            elif i == 2:
+                domain_info['Performance'] = row[i]
+            elif i == 3:
+                domain_info['Trust'] = row[i]
+
+    return domain_info
+
+
 @app.callback(
     Output('clickable-graph', 'figure'),
     [Input('chem_dropdown', 'value'),
@@ -83,9 +111,23 @@ def highlight_domain(chem_dropdown_values, plot_type):
     [Input('chem_dropdown', 'value')])
 def update_domain_info_classification(chem_dropdown_value):
     """ Aggiorna le informazione riguardo la classificazione
-     del dominio selezionato"""
+     del dominio selezionato """
 
-    return get_domain_classification_info(chem_dropdown_value, df_result)
+    domain_info = get_domain_dict(df_result, chem_dropdown_value)
+    return get_domain_classification_info(domain_info)
+
+
+@app.callback(
+    Output('domain-preview', 'children'),
+    [Input('chem_dropdown', 'value')])
+def update_domain_preview(chem_dropdown_value):
+    """ Aggiorna le informazione riguardo la classificazione
+     del dominio selezionato """
+
+    domain = get_domain_dict(df_result, chem_dropdown_value)['Domain']
+    print "domain------>", domain
+    domain_url = "http://www." + str(domain)
+    return get_domain_preview(domain_url)
 
 def dfRowFromHover( hoverData ):
     print "**CALLBACK::dfRowFromHover**"
@@ -99,6 +141,8 @@ def dfRowFromHover( hoverData ):
                 return df_result.loc[df_result['Domain'] == domain_name]
     return pd.Series()
 
+
+'''
 @app.callback(
     Output('chem_name', 'children'),
     [Input('clickable-graph', 'hoverData')])
@@ -124,6 +168,7 @@ def return_href(hoverData):
         return
     datasheet_link = "http://" + row['Domain'].iloc[0]
     return datasheet_link
+'''
 
 @app.callback(
     Output('chem_img', 'src'),

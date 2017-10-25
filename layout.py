@@ -2,41 +2,24 @@
 import dash_html_components as html
 import dash_core_components as dcc
 
-def get_domain_classification_info( selection, df ):
+
+def get_domain_classification_info(domain_info=None):
     """  """
+    if not domain_info:
+        domain_info = {}
+        domain_info['Sticker'] = ""
+        domain_info['HTTPS'] = ""
+        domain_info['Performance'] = ""
+        domain_info['Trust'] = ""
 
-    try:
-        df_subset = df.loc[df['Domain'].isin(selection)]
-    except:
-        tmp = []
-        tmp.append(str(selection))
-        df_subset = df.loc[df['Domain'].isin(tmp)]
-
-    print "df_subset--------->", df_subset
-    domain_info = {}
-    for index, row in df_subset.iterrows():
-        for i in range(len(row)):
-            if i == 0 or i == 6:
-                domain_info['Domain'] = row[i]
-            elif i == 5:
-                domain_info['Sticker'] = row[i]
-            elif i == 1:
-                domain_info['HTTPS'] = row[i]
-            elif i == 2:
-                domain_info['Performance'] = row[i]
-            elif i == 3:
-                domain_info['Trust'] = row[i]
-
-    print "domain_info--------->", domain_info
 
     return [html.Div([
-        # html.Iframe(src="www." + domain_info['Domain']),
-        html.Div([
-            html.Iframe(id="screenshot",
-                        src="http://www." + domain_info['Domain'],
-                        sandbox="allow-same-origin",
-                        style={'border': 'none', 'width': '100%', 'height': 500})
-        ], className="eight columns"),
+        # html.Div([
+        #    html.Iframe(id="domain-preview",
+        #                src="http://www." + domain_info['Domain'],
+        #                sandbox="allow-same-origin",
+        #                style={'border': 'none', 'width': '100%', 'height': 500})
+        # ], className="eight columns"),
 
         html.Img(id='chem_img', src=domain_info['Sticker'],
                  style={'margin': '0 auto', 'display': 'block', 'width': '100'}),
@@ -67,6 +50,20 @@ def get_domain_classification_info( selection, df ):
                 value=domain_info['Trust'],
             )
         ])]
+
+
+def get_domain_preview(domain_url):
+    print ("*******", domain_url, "************")
+    return [html.Div([
+        # html.Iframe(src="www." + domain_info['Domain']),
+        html.Div([
+            html.Iframe(src=domain_url,
+                        sandbox="allow-same-origin",
+                        style={'border': 'none', 'width': '90%', 'height': 500, 'allowfullscreen': '',
+                               'frameborder': '0'})
+        ], className="eight columns")
+    ])]
+
 
 def get_html_layout(starting_domain,
                     score_sticker,
@@ -126,24 +123,15 @@ def get_html_layout(starting_domain,
                     dcc.Dropdown(id='chem_dropdown',
                                  value=[starting_domain],
                                  options=[{'label': i, 'value': i} for i in df['Domain'].tolist()]),
+                    html.Div(get_domain_classification_info(),
+                             id='domain-info-element',
+                             className='four columns'
+                             ),
                 ],
-                    className='six columns',
+                    className='four columns',
                 ),
-                html.Div([
-                    html.A(starting_domain,
-                           id='chem_name',
-                           href="https://www.gov.it",
-                           target="_blank",
-                           style={'text-align': 'center', 'display': 'block'}),
-
-                ],
-                    className='two columns',
-                ),
-
-                html.Div(get_domain_classification_info([starting_domain], df),
-                    id='domain-info-element',
-                    className='four columns'
-                ),
+                html.Div(get_domain_preview(starting_domain),
+                         id="domain-preview"),
             ],
                 className='row',
                 style={'margin-bottom': '10'}
