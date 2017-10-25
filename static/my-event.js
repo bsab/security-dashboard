@@ -8,16 +8,13 @@ body.appendChild(newNode);
 console.log(body)
 
 console.log("*******************")
-window.onload = function (e) {
-    alert("onload!!!")
-    document.getElementById("performance_slider").addEventListener("change", function () {
-        alert("ciao")
-        var myElement = document.getElementById(myId);
-        myElement.innerHtml = ([
-            '<div>',
-            '<hr/>',
-            '<div style="font-size: 14px;">CIAO!</div>',
-            '</div>'
-        ].join(''))
-    });
-}
+document.getElementById("react-select-2--value-item").addEventListener("change", function () {
+    alert("ciao")
+    var myElement = document.getElementById(myId);
+    myElement.innerHtml = ([
+        '<div>',
+        '<hr/>',
+        '<div style="font-size: 14px;">CIAO!</div>',
+        '</div>'
+    ].join(''))
+});
