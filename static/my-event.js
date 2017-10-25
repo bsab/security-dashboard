@@ -9,6 +9,7 @@ body.appendChild(newNode);
 console.log(body)
 console.log(document.getElementById("chem_dropdown"))
 
+
 document.getElementById("chem_dropdown").addEventListener("change", function () {
     alert("ciao")
     var myElement = document.getElementById(myId);

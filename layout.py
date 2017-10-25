@@ -31,7 +31,9 @@ def get_domain_classification_info( selection, df ):
         html.Img(id='chem_img', src=domain_info['Sticker'],
                  style={'margin': '0 auto', 'display': 'block', 'width': '100'}),
 
-            html.Label('HTTPS:'),
+        html.P('test', id='performance_slider'),
+
+        html.Label('HTTPS:'),
             dcc.Slider(
                 id='https_slider',
                 min=0,
