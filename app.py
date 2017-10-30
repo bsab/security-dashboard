@@ -164,7 +164,6 @@ def update_domain_preview(clickData):
     except:
         return
 
-
 @app.callback(
     Output('chem_img', 'src'),
     [Input('clickable-graph', 'clickData')])
