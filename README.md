@@ -1,4 +1,8 @@
 # Security-Dashboard #
+
+
+[![Test Build Status](https://travis-ci.org/bsab/security-dashboard.svg?branch=master)](https://travis-ci.org/bsab/security-dashboard/builds#)
+
 A dashboard that shows the status of security features on .gov.it websites
 
 Select a domain from the search bar or directly by clicking on the chart. Each domain has been assigned a score from A to F.
@@ -42,6 +46,8 @@ Running Your Application
 Now, you can run the application locally.
 
     python app.py
+
+The following are screenshots for the app in this repo:
 
 
 ## Authors
