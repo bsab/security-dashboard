@@ -1,144 +1,174 @@
 # -*- coding: utf-8 -*-
 import os
 import flask
-import dash
 import pandas as pd
-
-import dash_html_components as html
-
+import dash_core_components as dcc
 from dash.dependencies import Input, Output
-from plot import create_scatter_plot
-from score import evalute_https_score, evalute_performance_score, evalute_trust_score, merge_df_results
-from layout import get_html_layout, make_dash_table, get_domain_classification_info
+
+from server import app
+from classifier import perform_classification
+from plot import get_explore_domain_plot, create_bar_plot
+from domains import get_domain_dict, get_domain_image_preview
+from layout import render_html_layout, get_domain_classification_layout, render_tab_page
 
 
-# Configurazione server Flask
-STATIC_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'static')
-server = flask.Flask('security-dashboard')
-app = dash.Dash('security-dashboard', server=server, url_base_pathname='/security-dashboard/', csrf_protect=False)
+dcc._js_dist[0]['external_url'] = (
+    'https://cdn.plot.ly/plotly-basic-1.31.0.min.js'
+)
 
-server.secret_key = os.environ.get('secret_key', 'secret')
+app.title = 'security-dashboard'
 
-#
-# Import dei csv ottenuti dall'utility domain-scan
-#
-
-# 1) Importo il csv relativo al test HTTPS (pshtt scanner)
-# e calcolo un punteggio finale associato ad ogni dominio analizzato
-# in scala da 0 a 15
-df_score_https = evalute_https_score("csv/pshtt.csv")
-
-# 2) Importo il csv relativo al test sulle performance (pageload scanner)
-# e calcolo un punteggio finale associato ad ogni dominio analizzato
-# in scala da 0 a 15
-df_score_performance = evalute_performance_score("csv/pageload.csv")
-
-#3) Importo il csv relativo al test sull'affidabilita' (trustymail scanner)
-# e calcolo un punteggio finale associato ad ogni dominio analizzato
-# in scala da 0 a 15
-df_trust_performance = evalute_trust_score("csv/trustymail.csv")
-
-# 4) Unifico i risultati in unico DataFrame definendo un punteggio finale
-# in scala da 0 a 1500
-df_result = merge_df_results(df_score_https, df_score_performance, df_trust_performance)
-
-#
-# Definisco i parametri per la configurazione del grafico Dash
-#
-x=df_result['HTTPS Score']
-y=df_result['Performance Score']
-z=df_result['Trust Score']
-size=df_result['Tot Score']
-color=df_result['Tot Score']
-text = df_result['Domain']
-
-xlabel = 'Sicurezza'
-ylabel = 'Performance'
-zlabel = 'Affidabilita'
-plot_type = 'scatter3d'
-
-# Plotting del grafico relativo alla lista dei domini importati
-domain_plot = create_scatter_plot(x, y, z, size, color, xlabel, ylabel, zlabel, plot_type, text)
-starting_domain = '1cdbacoli.gov.it'
-domain_description = ""
-DOMAIN_IMG = ""
 
 # Rendering del plot sulla pagina Html
-app.layout = get_html_layout(starting_domain,
-                             DOMAIN_IMG,
-                             domain_description,
-                             domain_plot,
-                             df_result)
+dict_data = {
+    'HTTPS':'data/csv/pshtt.csv',
+    'PERFORMANCE':'data/csv/pageload.csv',
+    'TRUST':'data/csv/trustymail.csv'
+}
 
-@app.callback(
-    Output('clickable-graph', 'figure'),
-    [Input('chem_dropdown', 'value'),
-     Input('charts_radio', 'value')])
-def highlight_domain(chem_dropdown_values, plot_type):
-    print "**CALLBACK::highlight_domain**"
-    return create_scatter_plot(x, y, z, size, color, xlabel, ylabel, zlabel, plot_type, text)
+# calcolo :
+# - il dataframe dei risultati totali(df_result),
+# - la lista dei domini sui quali effettuare la ricerca
+# - i dataframe dettagliati per https, trust e performance
+data_results = perform_classification(dict_data)
+df_https = data_results['dataframe_https']
+df_perf = data_results['dataframe_perf']
+df_trust = data_results['dataframe_trust']
+search_domain_list = data_results['search_domain_list']
 
-@app.callback(
-    Output('table-element', 'children'),
-    [Input('chem_dropdown', 'value')])
-def update_table(chem_dropdown_value):
-    print "**CALLBACK::update_table**"
-    """ Modifica la tabella con i domini selezionati """
-    table = make_dash_table( chem_dropdown_value, df_result)
-    return table
+# creo il grafico per l'esploraione di tutti i dati
+df_result = data_results['dataframe_all_result']
+search_domain_graph = get_explore_domain_plot(df_result)
 
-@app.callback(
-    Output('domain-info-element', 'children'),
-    [Input('chem_dropdown', 'value')])
-def update_domain_info(chem_dropdown_value):
-    print "**CALLBACK::update_domain_info**"
-    """ Modifica la tabella con i domini selezionati """
-    table = get_domain_classification_info( chem_dropdown_value, df_result)
-    return table
+#..ed infine procedo con il rendering
+app.layout = render_html_layout()
 
-def dfRowFromHover( hoverData ):
-    print "**CALLBACK::dfRowFromHover**"
+
+def dfRowFromHover(hoverData):
     """ Ritorna il dominio in hover """
     if hoverData is not None:
         if 'points' in hoverData:
             firstPoint = hoverData['points'][0]
             if 'pointNumber' in firstPoint:
                 point_number = firstPoint['pointNumber']
-                domain_name = str(domain_plot['data'][0]['text'][point_number]).strip()
+                domain_name = str(search_domain_graph['data'][0]['text'][point_number]).strip()
                 return df_result.loc[df_result['Domain'] == domain_name]
     return pd.Series()
 
-@app.callback(
-    Output('chem_name', 'children'),
-    [Input('clickable-graph', 'hoverData')])
-def return_domain_name(hoverData):
-    print "**CALLBACK::return_domain_name**"
-    """ Ritorna il dominio in hover """
-    if hoverData is not None:
-        if 'points' in hoverData:
-            firstPoint = hoverData['points'][0]
-            if 'pointNumber' in firstPoint:
-                point_number = firstPoint['pointNumber']
-                domain_name = str(domain_plot['data'][0]['text'][point_number]).strip()
-                return ""
+#
+# Lista delle callback associate al grafico ed al box di ricerca
+#
 
 @app.callback(
-    Output('chem_name', 'href'),
-    [Input('clickable-graph', 'hoverData')])
-def return_href(hoverData):
-    print "**CALLBACK::return_href**"
-    """ Ritorna il link del dominio in hover """
-    row = dfRowFromHover(hoverData)
-    if row.empty:
+    Output('tab-output', 'children'),
+    [Input('tabs', 'value')])
+def display_tab_content(value):
+    return render_tab_page(value,
+                           search_domain_graph,
+                           search_domain_list)
+
+@app.callback(
+    Output('domain-info-element', 'children'),
+    [Input('search_dropdown', 'value')])
+def update_domain_info_classification(search_dropdown_value):
+    """ Aggiorna le informazione riguardo la classificazione
+     del dominio selezionato """
+
+    domain_info = get_domain_dict(df_result, search_dropdown_value)
+    return get_domain_classification_layout(domain_info)
+
+@app.callback(
+    Output('https_graph', 'figure'),
+    [Input('search_dropdown', 'value')])
+def update_https_plot(search_dropdown_value):
+    """ Aggiorna il grafico relativo alla sicurezza http
+     selezionando solo la riga relativa al dominio selezionato"""
+    if search_dropdown_value:
+        # costruisco il grafico per i dettagli Https
+        try:
+            df_https_selected = df_https.loc[df_https['Domain'].isin(search_dropdown_value)]
+        except:
+            tmp = []
+            tmp.append(str(search_dropdown_value))
+            df_https_selected = df_https.loc[df_https['Domain'].isin(tmp)]
+
+        # seleziono solo le colonne interessanti per il calcolo
+        columns = ['Domain Supports HTTPS',
+                   'Domain Enforces HTTPS',
+                   'Domain Uses Strong HSTS']
+        values = pd.DataFrame(df_https_selected, columns=columns).values[0]
+
+        return create_bar_plot('Sicurezza', values.astype('O'), columns)
+
+@app.callback(
+    Output('perf_graph', 'figure'),
+    [Input('search_dropdown', 'value')])
+def update_perf_plot(search_dropdown_value):
+    """ Aggiorna il grafico relativo alle performance
+     selezionando solo la riga relativa al dominio selezionato"""
+    if search_dropdown_value:
+        # costruisco il grafico per i dettagli Https
+        try:
+            df_perf_selected = df_perf.loc[df_perf['Domain'].isin(search_dropdown_value)]
+        except:
+            tmp = []
+            tmp.append(str(search_dropdown_value))
+            df_perf_selected = df_perf.loc[df_perf['Domain'].isin(tmp)]
+
+        # seleziono solo le colonne interessanti per il calcolo
+        columns = ['domContentLoaded',
+                   'domComplete']
+        if df_perf_selected.empty:
+            print('DataFrame is empty!')
+            return create_bar_plot('Performance', [0, 0, 0], columns)
+
+        values = pd.DataFrame(df_perf_selected, columns=columns).values[0]
+
+        return create_bar_plot('Performance', values.astype('O'), columns)
+
+@app.callback(
+    Output('trust_graph', 'figure'),
+    [Input('search_dropdown', 'value')])
+def update_trust_plot(search_dropdown_value):
+    """ Aggiorna il grafico relativo all'affidabilità
+     selezionando solo la riga relativa al dominio selezionato"""
+    if search_dropdown_value:
+        # costruisco il grafico per i dettagli Https
+        try:
+            df_trust_selected = df_trust.loc[df_trust['Domain'].isin(search_dropdown_value)]
+        except:
+            tmp = []
+            tmp.append(str(search_dropdown_value))
+            df_trust_selected = df_trust.loc[df_trust['Domain'].isin(tmp)]
+
+        # seleziono solo le colonne interessanti per il calcolo
+        columns = ['MX Record',
+                   'Valid SPF',
+                   'Valid DMARC']
+        values = pd.DataFrame(df_trust_selected, columns=columns).values[0]
+
+        return create_bar_plot('Affidabilita', values.astype('O'), columns)
+
+@app.callback(
+    Output('domain-preview', 'src'),
+    [Input('clickable-graph', 'clickData')])
+def update_domain_preview(clickData):
+    """ Aggiorna le informazione riguardo la classificazione
+     del dominio selezionato alla selezione del dominio nella
+     combobox oppure cliccando sul grafico"""
+
+    try:
+        # seleziono l'url del dominio
+        domain_name = clickData['points'][0]['text']
+        return get_domain_image_preview(domain_name)
+    except:
         return
-    datasheet_link = "http://" + row['Domain'].iloc[0]
-    return datasheet_link
+
 
 @app.callback(
     Output('chem_img', 'src'),
-    [Input('clickable-graph', 'hoverData')])
+    [Input('clickable-graph', 'clickData')])
 def display_image(hoverData):
-    print "**CALLBACK::display_image**"
     """ Ritorna l'immagine dello score corrispondente al dominio in hover """
     row = dfRowFromHover(hoverData)
     if row.empty:
@@ -148,37 +178,57 @@ def display_image(hoverData):
 
 
 @app.callback(
-    Output('chem_desc', 'children'),
-    [Input('clickable-graph', 'hoverData')])
-def display_domain(hoverData):
-    print "**CALLBACK::display_domain** -->", hoverData
-    """ Ritorna il layout HTML dei parametri del dominio in hover"""
+    Output('https_slider', 'value'),
+    [Input('clickable-graph', 'clickData')])
+def over_refresh_https(hoverData):
     row = dfRowFromHover(hoverData)
     if row.empty:
         return
-    description = html.Div([
-        html.P("HTTPS SCORE: " + str(row['HTTPS Score'].iloc[0])),
-        html.P("PERFORMANCE SCORE: " + str(row['Performance Score'].iloc[0])),
-        html.P("TRUST SCORE: " + str(row['Trust Score'].iloc[0])),
-        html.P("TOT SCORE: " + str(row['Tot Score'].iloc[0])),
-    ], style={'margin-top': '15px'}),
+    return row['HTTPS Score'].iloc[0]
 
-    return description
+
+@app.callback(
+    Output('performance_slider', 'value'),
+    [Input('clickable-graph', 'clickData')])
+def over_refresh_performance(hoverData):
+    row = dfRowFromHover(hoverData)
+    if row.empty:
+        return
+    return row['Performance Score'].iloc[0]
+
+
+@app.callback(
+    Output('trust_slider', 'value'),
+    [Input('clickable-graph', 'clickData')])
+def over_refresh_trust(hoverData):
+    row = dfRowFromHover(hoverData)
+    if row.empty:
+        return
+    return row['Trust Score'].iloc[0]
+
 
 @app.server.route('/static/<resource>')
 def serve_static(resource):
     """ Serve gli statici dalla cartella /static/ """
     return flask.send_static_file(resource)
 
-# Aggiunta di file CSS esterni
-external_css = ["https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css",
-                "//fonts.googleapis.com/css?family=Raleway:400,300,600",
-                "//fonts.googleapis.com/css?family=Dosis:Medium",
-                "/static/css/style.css"]
 
-for css in external_css:
-    app.css.append_css({"external_url": css})
+@app.server.route('/static/<filename>.js')
+def serve_script(filename):
+    print(('serving {}'.format(filename)))
+    if filename not in ['my-event']:
+        raise Exception('"{}" is excluded from the allowed static files'.format(filename))
+    return flask.send_from_directory(os.getcwd(), '{}.js'.format(filename))
+
+# Aggiunta di file CSS esterni
+app.css.append_css({
+    'external_url': (
+        'https://cdn.rawgit.com/plotly/dash-app-stylesheets/8485c028c19c393e9ab85e1a4fafd78c489609c2/dash-docs-base.css',
+        'https://fonts.googleapis.com/css?family=Dosis',
+        'https://cdn.rawgit.com/plotly/dash-app-stylesheets/8485c028c19c393e9ab85e1a4fafd78c489609c2/dash-docs-base.css',
+        '/static/css/style.css',
+    )
+})
 
 if __name__ == '__main__':
-    app.title = 'security-dashboard'
-    app.run_server()
+    app.run_server(debug=True, threaded=True, port=8050)

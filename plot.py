@@ -1,3 +1,7 @@
+from __future__ import division
+import plotly.graph_objs as go
+
+from classifier import evalute_https_score, evalute_performance_score, evalute_trust_score, merge_df_results
 
 BACKGROUND = 'rgb(230, 230, 230)'
 
@@ -26,9 +30,6 @@ def add_markers(figure_data,
             if m == hover_text[i]:
                 indices.append(i)
 
-    if plot_type == 'histogram2d':
-        plot_type = 'scatter'
-
     traces = []
     for point_number in indices:
         trace = dict(
@@ -52,7 +53,6 @@ def add_markers(figure_data,
 
 def create_scatter_plot(x, y, z, size, color, xlabel, ylabel, zlabel, plot_type, text, markers=[] ):
     """
-
     :param x: dataset asse X
     :param y: dataset asse Y
     :param z: dataset asse Z
@@ -69,7 +69,7 @@ def create_scatter_plot(x, y, z, size, color, xlabel, ylabel, zlabel, plot_type,
     def axis_template_3d( title, type='linear' ):
         return dict(
             showbackground = True,
-            backgroundcolor = BACKGROUND,
+            backgroundcolor = '#FFFFFF',
             gridcolor = 'rgb(255, 255, 255)',
             title = title,
             type = type,
@@ -79,7 +79,7 @@ def create_scatter_plot(x, y, z, size, color, xlabel, ylabel, zlabel, plot_type,
     def axis_template_2d(title):
         return dict(
             xgap = 10, ygap = 10,
-            backgroundcolor = BACKGROUND,
+            backgroundcolor = '#FFFFFF',
             gridcolor = 'rgb(255, 255, 255)',
             title = title,
             zerolinecolor = 'rgb(255, 255, 255)',
@@ -98,7 +98,7 @@ def create_scatter_plot(x, y, z, size, color, xlabel, ylabel, zlabel, plot_type,
         z = z,
         mode = 'markers',
         marker = dict(
-            colorscale = COLORSCALE,
+            colorscale=COLORSCALE,
             colorbar = dict( title = "Grado di<br>Sicurezza" ),
             line = dict( color = '#444' ),
             reversescale = True,
@@ -129,33 +129,71 @@ def create_scatter_plot(x, y, z, size, color, xlabel, ylabel, zlabel, plot_type,
         )
     )
 
-    '''
-    if plot_type in ['histogram2d', 'scatter']:
-        layout['xaxis'] = axis_template_2d(xlabel)
-        layout['yaxis'] = axis_template_2d(ylabel)
-        layout['plot_bgcolor'] = BACKGROUND
-        layout['paper_bgcolor'] = BACKGROUND
-        del layout['scene']
-        del data[0]['z']
-
-    if plot_type == 'histogram2d':
-        # Scatter plot overlay on 2d Histogram
-        data[0]['type'] = 'scatter'
-        data.append( dict(
-            x = x,
-            y = y,
-            type = 'histogram2d',
-            colorscale = 'Greys',
-            showscale = False
-        ) )
-        layout['plot_bgcolor'] = 'black'
-        layout['paper_bgcolor'] = 'black'
-        layout['xaxis'] = blackout_axis(layout['xaxis'])
-        layout['yaxis'] = blackout_axis(layout['yaxis'])
-        layout['font']['color'] = 'white'
-    '''
-
     if len(markers) > 0:
-        data = data + add_markers(data, markers, plot_type=plot_type)
+        data += add_markers(data, markers, plot_type=plot_type)
 
-    return dict( data=data, layout=layout )
+    return dict(data=data, layout=layout)
+
+
+def create_bar_plot(title, values, phases):
+    """Crezione del grafico a barre"""
+    trace0 = go.Bar(
+        y=phases,
+        x=values,
+        marker=dict(
+            color='rgb(158,202,225)',
+            line=dict(
+                color='rgb(8,48,107)',
+                width=1.5,
+            )
+        ),
+        opacity=0.6,
+        orientation='h',
+        width=0.2
+    )
+
+    data = [trace0]
+    layout = go.Layout(
+        title="<b>" + title + "</b>",
+        titlefont=dict(
+            size=20,
+            color='rgb(203,203,203)'
+        ),
+        showlegend=False,
+        xaxis=dict(
+            ticks='outside',
+            tickcolor='#000',
+        ),
+        yaxis=dict(
+            ticks='outside',
+            tickcolor='#000',
+            tickfont=dict(
+                size=7,
+                color='black'
+            ),
+        )
+    )
+
+    return go.Figure(data=data, layout=layout)
+
+def get_explore_domain_plot(df_result):
+    #
+    # Definisco i parametri per la configurazione del grafico Dash
+    #
+    x = df_result['HTTPS Score']
+    y = df_result['Performance Score']
+    z = df_result['Trust Score']
+    size = df_result['Tot Score']
+    color = df_result['Tot Score']
+    text = df_result['Domain']
+
+    xlabel = 'Sicurezza'
+    ylabel = 'Performance'
+    zlabel = 'Affidabilita'
+
+    plot_type = 'scatter3d'
+
+    # Plotting del grafico relativo alla lista dei domini importati
+    explore_domain_plot = create_scatter_plot(x, y, z, size, color, xlabel, ylabel, zlabel, plot_type, text)
+
+    return explore_domain_plot

@@ -2,244 +2,296 @@
 import dash_html_components as html
 import dash_core_components as dcc
 
-def make_dash_table( selection, df ):
-    print "make_dash_table--->", selection
-    """ Return a dash defintion of an HTML table for a Pandas dataframe """
 
-    try:
-        df_subset = df.loc[df['Domain'].isin(selection)]
-    except:
-        tmp = []
-        tmp.append(str(selection))
-        df_subset = df.loc[df['Domain'].isin(tmp)]
+def header_layout():
+    """ Rendering header"""
+    return html.Div(
+        className='header',
+        children=html.Div(
+            className='container-width',
+            style={'height': '100%'},
+            children=[
+                html.A(html.Img(
+                    src="https://avatars1.githubusercontent.com/u/15377824?v=4&s=200",
+                    className="logo"
+                ), href='#', className="logo-link"),
+                html.Div(className="", children=[
+                    html.H1('Security Dashboard', className="header-title"),
+                ])
+            ]
+        )
+    )
 
-    table = []
-    table.append(html.Tr([html.Th('Dominio'), html.Th("HTTPS Score"), html.Th("Performance Score"), html.Th("Trust Score"), html.Th("Grado")]))
-    for index, row in df_subset.iterrows():
-        html_row = []
-        for i in range(len(row)):
-            if i == 0 or i == 6:
-                html_row.append( html.Td([ row[i] ]) )
-            elif i == 5:
-                html_row.append( html.Td([ html.Img( src=row[i], style={'margin': '0 auto', 'display': 'block', 'width': '50'} )]))
-            elif i == 1:
-                html_row.append( html.Td([ row[i] ]))
-            elif i == 2:
-                html_row.append( html.Td([ row[i] ]))
-            elif i == 3:
-                html_row.append( html.Td([ row[i] ]))
-        table.append( html.Tr( html_row ) )
 
-    print table
-    return table
-
-def get_domain_classification_info( selection, df ):
-    print "get_domain_classification_info--->", df
-    """  """
-
-    try:
-        df_subset = df.loc[df['Domain'].isin(selection)]
-    except:
-        tmp = []
-        tmp.append(str(selection))
-        df_subset = df.loc[df['Domain'].isin(tmp)]
-
-    print "df_subset['Domain']--->", df_subset['Domain']
-
-    return [html.Div([
-            html.Label('HTTPS:'),
-            dcc.Slider(
-                id='price_slider',
-                min=0,
-                max=15,
-                value=5,
-            ),
-        ]),
+def tab_introduction():
+    """ Rendering della pagina linkata dal tab Introduzione"""
+    return [html.Div(
         html.Div([
-            html.Label('Performance:'),
-            dcc.Slider(
-                id='volume_slider',
-                min=0,
-                max=10,
-                value=1,
-            )
-        ]),
-        html.Div([
-            html.Label('Trust:'),
-            dcc.Slider(
-                id='trust_slider',
-                min=0,
-                max=10,
-                value=1,
-            )
-        ])]
+            html.H1('Security Dashboard'),
+            html.Hr(),
+            html.P("Il calcolo del punteggio viene effettuato sulla base di 3 caratteristiche:"),
+            html.Ul([
+                html.Li([html.Strong('Sicurezza'), html.Span(': garantita dall\'uso del protocollo HTTPS o HTS.')]),
+                html.Li([html.Strong('Performance'),
+                         html.Span(': analizzando i tempi di caricamento delle pagine e degli assets.')]),
+                html.Li(
+                    [html.Strong('Affidabilita'), html.Span(': verificando l\'utilizzo dei record MX, SPF e DMARC.')]),
+            ]),
+            html.P(
+                "Considerando questi fattori, ad ogni dominio viene attribuito un punteggio da A a F."),
+            html.Img(src='/static/img/classifica.png',
+                     style={'margin': '0 auto',
+                            'display': 'block'}),
+            html.P(
+                "Il dominio che ottiene il valore più alto in tutte tre queste caratteristiche puo essere considerato un dominio altamente sicuro."),
+            html.Hr(),
+        ])
+    )]
 
-def get_html_layout(starting_domain,
-                    score_sticker,
-                    domain_info,
-                    FIGURE,
-                    df):
-    return html.Div([
 
-    # Row 1: Header and Intro text
-
-    html.Div([
-        html.Img(src="https://avatars1.githubusercontent.com/u/15377824?v=4&s=200",
-                style={
-                    'height': '100px',
-                    'float': 'right',
-                    'position': 'relative',
-                    'bottom': '40px',
-                    'left': '50px',
-                    'top': '0px'
-                },
-                ),
-        html.H2('Security Dashboard',
-                style={
-                    'position': 'relative',
-                    'top': '0px',
-                    'left': '27px',
-                    'font-family': 'Dosis',
-                    'display': 'inline',
-                    'font-size': '6.0rem',
-                    'color': '#4D637F'
-                }),
-    ], className='row twelve columns', style={'position': 'relative', 'right': '15px'}),
-
-    html.Div([
-        html.Div([
+def get_domain_classification_layout(domain_info=None):
+    """Creazione del layout relativo alla classificazione
+      che ha ottenuto il dominio"""
+    if domain_info:
+        return [html.Div([
             html.Div([
+                html.Br(),
+                html.Img(id='chem_img', src=domain_info['Sticker'],
+                         style={'margin': '0 auto',
+                                'display': 'block',
+                                'width': '100'}),
                 html.Div([
-
-                    html.P("Seleziona un dominio dalla barra di ricerca o direttamente cliccando sul grafico. Ad ogni dominio è stato associato un punteggio da A a F."),
-                    html.P("Il calcolo del punteggio viene effettuato sulla base di 3 caratteristiche:"),
-                    html.P("- Sicurezza: garantita dall'uso del protocollo HTTPS o HTS.", style={'margin-top':'-20px'}),
-                    html.P("- Performance: analizzando i tempi di caricamento delle pagine e degli assets.", style={'margin-top':'-20px'}),
-                    html.P("- Affidabilita: verificando l'utilizzo dei record MX, SPF e DMARC.", style={'margin-top':'-20px'}),
-                    html.P("Il dominio che ottiene il valore più alto in tutte tre queste caratteristiche puo essere considerato un dominio altamente sicuro."),
-
+                    html.H3(domain_info['Domain'],
+                            style={'text-align': 'center'})
                 ]),
-            ], style={'margin-left': '10px'}),
-        ], className='row'),
-
-        html.Hr(style={'margin': '0', 'margin-bottom': '5'}),
-
-        html.Div(
-            [
-            html.Hr(style={'margin': '0', 'margin-bottom': '5'}),
+            ]),
             html.Div([
-                html.Div([
-                    html.Label('Cerca:'),
-                    dcc.Dropdown(id='chem_dropdown',
-                                 # multi=True,
-                                 value=[starting_domain],
-                                 options=[{'label': i, 'value': i} for i in df['Domain'].tolist()]),
-                ],
-                    className='six columns',
+                html.Div(
+                    [
+                        html.Label('Sicurezza:'),
+                        dcc.Slider(
+                            id='https_slider',
+                            min=0,
+                            max=15,
+                            value=domain_info['HTTPS'],
+                            disabled=True,
+                        ),
+                    ]
                 ),
                 html.Div([
-                    html.Img(id='chem_img', src=score_sticker,
-                             style={'margin': '0 auto', 'display': 'block', 'width': '100'}),
-                    html.A(starting_domain,
-                           id='chem_name',
-                           href="https://www.gov.it",
-                           target="_blank",
-                           style={'text-align': 'center', 'display': 'block'}),
-                    html.P(domain_info,
-                           id='chem_desc',
-                           style=dict(maxHeight='400px', fontSize='12px')),
-
-                ],
-                    className='two columns',
-                ),
-
-                html.Div(get_domain_classification_info([starting_domain], df),
-                    id='domain-info-element',
-                    className='four columns'
-                ),
-            ],
-                className='row',
-                style={'margin-bottom': '10'}
-            ),
-            html.Div([
-                dcc.Graph(id='iv_surface', style={'max-height': '600', 'height': '60vh'}),
-            ],
-                className='row',
-                style={'margin-bottom': '20'}
-            ),
-            html.Div([
+                    html.Label('Performance:'),
+                    dcc.Slider(
+                        id='performance_slider',
+                        min=0,
+                        max=10,
+                        value=domain_info['Performance'],
+                        disabled=True,
+                    )
+                ]),
                 html.Div([
-                    dcc.Graph(id='iv_heatmap', style={'max-height': '350', 'height': '35vh'}),
-                ],
-                    className='five columns'
-                ),
-                html.Div([
-                    dcc.Graph(id='iv_scatter', style={'max-height': '350', 'height': '35vh'}),
-                ],
-                    className='seven columns'
-                )
-            ],
-                className='row'
-            ),
-            # Temporary hack for live dataframe caching
-            # 'hidden' set to 'loaded' triggers next callback
-            html.P(
-                hidden='',
-                id='raw_container',
-                style={'display': 'none'}
-            ),
-            html.P(
-                hidden='',
-                id='filtered_container',
-                style={'display': 'none'}
-            )
-        ],
-         className='container'
-    ),
-        html.Div([
-            html.Table(make_dash_table([starting_domain], df), id='table-element'),
-        ]
+                    html.Label('Affidabilità:'),
+                    dcc.Slider(
+                        id='trust_slider',
+                        min=0,
+                        max=10,
+                        value=domain_info['Trust'],
+                        disabled=True,
+                    )
+                ]),
+            ],style={'margin':'10px 50px 10px 50px'}),
+            html.Br(),
+        ],className='eight columns content-container',
+            style={
+                'padding-bottom': '15px'
+            }
         ),
-    ]),
+            html.Div(
+                [
+                    html.Img(src=domain_info['Preview'],
+                             id='domain-preview',
+                             style={
+                                 'width': '100%'
+                             })
+                ], className='browser-mockup with-url four columns')
+        ]
 
 
-    # Row 2: Hover Panel and Graph
-    html.Hr(style={'margin': '0', 'margin-bottom': '5'}),
-    html.Div([
+def render_html_layout():
+    """ Rendering della pagina completa"""
+    return html.Div([
+        html.Meta(name='viewport', content='width=device-width, initial-scale=1.0'),
+        html.Meta(
+            name='description',
+            content=('Security Dashboard '
+                     'A dashboard that shows the status of security features on .gov.it websites')
+        ),
+        header_layout(),
         html.Div([
-            html.P("GRADO DI SICUREZZA", style={'text-align': 'center', 'fontSize': '20px', 'margin-top': '10px'}),
-            #html.Img(id='chem_img', src=score_sticker, style={'margin': '0 auto', 'display': 'block', 'width': '100'}),
-            #html.A(starting_domain,
-            #       id='chem_name',
-            #       href="https://www.gov.it",
-            #       target="_blank",
-            #       style={'text-align': 'center', 'display': 'block'}),
-
-            #html.P(domain_info,
-            #       id='chem_desc',
-            #       style=dict( maxHeight='400px', fontSize='12px' )),
-
-        ], className='three columns', style=dict(height='300px') ),
-
-        html.Div([
-
-            dcc.RadioItems(
-                id = 'charts_radio',
-                options=[
-                    dict(label='Visualizzazione 3D', value='scatter3d'),
-                    dict(label='Visualizzazione 2D', value='scatter'),
-                    # dict( label='Istogramma', value='histogram2d' ),
-                ],
-                labelStyle = dict(display='inline'),
-                value='scatter3d'
+            html.Div(
+                dcc.Tabs(
+                    tabs=[
+                        {'label': 'Introduzione', 'value': 1},
+                        {'label': 'Cerca', 'value': 2},
+                        {'label': 'Esplora', 'value': 3},
+                    ],
+                    value=1,
+                    id='tabs',
+                    vertical=True,
+                    style={
+                        'height': '100vh',
+                        'borderRight': 'thin lightgrey solid',
+                        'textAlign': 'left'
+                    }
+                ),
+                style={'width': '20%', 'float': 'left'}
             ),
+            html.Div(
+                html.Div(id='tab-output'),
+                style={'width': '80%', 'float': 'right'}
+            )
+        ], style={
+            'fontFamily': 'Sans-Serif',
+            'margin-left': 'auto',
+            'margin-right': 'auto',
+        })
+    ])
 
-            dcc.Graph(id='clickable-graph',
-                      style=dict(width='700px'),
-                      hoverData=dict( points=[dict(pointNumber=0)] ),
-                      figure=FIGURE ),
 
-        ], className='nine columns', style=dict(textAlign='center')),
-    ], className='row' ),
-], className='container')
+def render_tab_page(tab_index,
+                    search_domain_graph,
+                    search_domain_list):
+    """ Rendering del singolo tab selezionato"""
+    if tab_index == 1:
+        return \
+            html.Div([
+                html.Div([
+                    html.Div([
 
+                        html.Div(
+                            [
+                                html.Div(
+                                    [
+                                        html.Div(tab_introduction(),
+                                                 id='domain-info-element'
+                                                 )
+                                    ],
+                                    className='twelve columns',
+                                    style={'margin-top': '20'}
+                                ),
+                            ],
+                            className='row'
+                        )
+                    ],
+                        className='ten columns offset-by-one'
+                    )
+                ])
+            ], className='container')
+    elif tab_index == 2:
+        return html.Div([
+            html.Div([
+                html.Div([
+                    html.Div([
+                        html.Div([
+                            html.Div([
+                                html.H2('Cerca un dominio'),
+                                html.Hr()]),
+                            html.P(
+                                "Seleziona un dominio dalla barra di ricerca per scoprirne il grado di affidabilità"),
+                        ]),
+                    ]),
+                    html.Div(
+                        [
+                            html.Div(
+                                [
+                                    dcc.Dropdown(id='search_dropdown',
+                                                 options=search_domain_list),
+                                ],
+                                className='six columns'
+                            )
+                        ],
+                        className='row'
+                    ),
+                    html.Div(
+                        [
+                            html.Div(
+                                [
+                                    html.Div(get_domain_classification_layout(),
+                                             id='domain-info-element'
+                                             )
+                                ],
+                                className='twelve columns',
+                                style={'margin-top': '20'}
+                            ),
+                        ],
+                        className='row'
+                    ),
+                    html.Div(
+                        [
+                            html.Div(
+                                [
+                                    dcc.Graph(id='https_graph')
+                                ],
+                                className='four columns',
+                            ),
+                            html.Div(
+                                [
+                                    dcc.Graph(id='perf_graph')
+                                ],
+                                className='four columns',
+                            ),
+                            html.Div(
+                                [
+                                    dcc.Graph(id='trust_graph')
+                                ],
+                                className='four columns',
+                            ),
+                        ],
+                        className='row'
+                    ),
+                ],
+                    className='ten columns offset-by-one'
+                )
+            ])
+        ], className='container',
+            style={'margin-bottom': '20'})
+    else:
+        return html.Div([
+            html.Div([
+                html.Div([
+                    html.Div([
+                        html.Div([
+                            html.Div([
+                                html.H2('Esplora i domini'),
+                                html.Hr()]),
+                            html.P(
+                                "Passa il mouse sul grafico per esplorare le caratteristiche dei domini"),
+                        ]),
+                    ]),
+                    html.Div(
+                        [
+                            html.Div(
+                                [
+                                    dcc.Graph(id='clickable-graph',
+                                              style=dict(width='100%'),
+                                              hoverData=dict(points=[dict(pointNumber=0)]),
+                                              figure=search_domain_graph),
+                                    dcc.RadioItems(
+                                        id='charts_radio',
+                                        options=[
+                                            dict(label='Visualizzazione 2D', value='scatter'),
+                                            dict(label='Visualizzazione 3D', value='scatter3d')
+                                        ],
+                                        labelStyle=dict(display='inline'),
+                                        value='scatter'
+                                    )
+                                ],
+                                className='twelve columns',
+                            ),
+                        ],
+                        className='row'
+                    ),
+                ],
+                    className='ten columns offset-by-one'
+                )
+            ])
+        ], className='container')

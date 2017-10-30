@@ -1,9 +1,16 @@
+# -*- coding: utf-8 -*-
+import os
 import pandas as pd
 import numpy as np
 import logging
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+
+def check_valid_file_name(base_file_name, file_path):
+    fileName, fileExtension = os.path.splitext(file_path)
+    return (fileName == base_file_name)
 
 def evalute_https_score(file_pshtt_csv):
     """
@@ -19,13 +26,21 @@ def evalute_https_score(file_pshtt_csv):
                'Domain Enforces HTTPS',
                'Domain Uses Strong HSTS']
 
+    #controllo che il file di input sia un file pshtt.csv
+    _file_check_name = 'pshtt.csv'
+    if not check_valid_file_name(_file_check_name, file_pshtt_csv):
+        return False
+
     try:
         # Scan domains and return data based on HTTPS best practices
         pshtt = pd.read_csv(file_pshtt_csv,
                             usecols=columns)
     except IOError as e:
         logger.error('Cannot load csv security file', exc_info=False)
-        exit(-1)
+        return False
+    except Exception as ge: #generic
+        logger.error('Exception:' + str(ge), exc_info=False)
+        return False
 
     # associo uno score rispetto ai boolean contenuti nelle rispettive colonne selezionate
     pshtt[['Domain Supports HTTPS']] *= 5
@@ -37,16 +52,15 @@ def evalute_https_score(file_pshtt_csv):
                                   pshtt['Domain Enforces HTTPS'] + \
                                   pshtt['Domain Uses Strong HSTS']
 
-    # Creo il dataframe degli score per HTTPS
+    # ..inifne creo il dataframe degli score per HTTPS
     df_score_https = pd.DataFrame(pshtt, columns=['Domain', 'HTTPS Score'])
 
-    return df_score_https
+    return df_score_https, pshtt
 
 
 def evalute_performance_score(file_pageload_csv):
     """
     return a Dataframe score for performance domain
-    :return:
     """
 
     # seleziono solo le colonne interessanti per il calcolo
@@ -55,13 +69,21 @@ def evalute_performance_score(file_pageload_csv):
                'domContentLoaded',
                'domComplete']
 
+    #controllo che il file di input sia un file pageload.csv
+    _file_check_name = 'pageload.csv'
+    if not check_valid_file_name(_file_check_name, file_pageload_csv):
+        return False
+
     # Scan domains and return web performance metrics collector
     try:
         pageload = pd.read_csv(file_pageload_csv,
                                usecols=columns)
     except IOError as e:
         logger.error('Cannot load csv performance file', exc_info=False)
-        exit(-1)
+        return False
+    except Exception as ge: #generic
+        logger.error('Exception:' + str(ge), exc_info=False)
+        return False
 
     # eseguo la somma degli score per ottenere un valore di score totale rispetto all'uso di HTTPS
     pageload.loc[:, 'Performance Score'] = (pageload['domContentLoaded'] + \
@@ -75,7 +97,7 @@ def evalute_performance_score(file_pageload_csv):
 
     # Creo il dataframe degli score per HTTPS
     df_score_performance = pd.DataFrame(pageload, columns=['Domain', 'Performance Score'])
-    return df_score_performance
+    return df_score_performance, pageload
 
 
 def evalute_trust_score(file_trust_csv):
@@ -91,12 +113,20 @@ def evalute_trust_score(file_trust_csv):
                'Valid SPF',
                'Valid DMARC']
 
+    # controllo che il file di input sia un file trustymail.csv
+    _file_check_name = 'trustymail.csv'
+    if not check_valid_file_name(_file_check_name, file_trust_csv):
+        return False
+
     # Scan domains and return web performance metrics collector
     try:
         df_trust_performance = pd.read_csv(file_trust_csv, usecols=columns)
     except IOError as e:
         logger.error('Cannot load csv trust file', exc_info=False)
-        exit(-1)
+        return False
+    except Exception as ge:  # generic
+        logger.error('Exception:' + str(ge), exc_info=False)
+        return False
 
     # associo uno score rispetto ai boolean contenuti nelle rispettive colonne selezionate
     df_trust_performance[['MX Record']] *= 5
@@ -110,7 +140,8 @@ def evalute_trust_score(file_trust_csv):
 
     # Creo il dataframe degli score per TRUST
     df_score_performance = pd.DataFrame(df_trust_performance, columns=['Domain', 'Trust Score'])
-    return df_score_performance
+
+    return df_score_performance, df_trust_performance
 
 
 def merge_df_results(df_score_https, df_score_performance, df_trust_performance):
@@ -140,3 +171,38 @@ def merge_df_results(df_score_https, df_score_performance, df_trust_performance)
                                                                      '/static/img/CircleF.png')))))
 
     return df_res
+
+def perform_classification(dict_data):
+    """
+    Questa procedura esegue l'mport dei csv ottenuti dall'utility domain-scan
+    e classifica ogni dominio rispetto ai parametri di sicurezza, performance
+    e affidabilità.
+    """
+
+    # 1) Importo il csv relativo al test HTTPS (pshtt scanner)
+    # e calcolo un punteggio finale associato ad ogni dominio analizzato
+    # in scala da 0 a 15
+    df_score_https, df_https = evalute_https_score(dict_data['HTTPS'])
+
+    # 2) Importo il csv relativo al test sulle performance (pageload scanner)
+    # e calcolo un punteggio finale associato ad ogni dominio analizzato
+    # in scala da 0 a 15
+    df_score_performance, df_perf = evalute_performance_score(dict_data['PERFORMANCE'])
+
+    #3) Importo il csv relativo al test sull'affidabilita' (trustymail scanner)
+    # e calcolo un punteggio finale associato ad ogni dominio analizzato
+    # in scala da 0 a 15
+    df_score_trust, df_trust = evalute_trust_score(dict_data['TRUST'])
+
+    # 4) Unifico i risultati in unico DataFrame definendo un punteggio finale
+    # in scala da 0 a 1500
+    df_result = merge_df_results(df_score_https, df_score_performance, df_score_trust)
+
+    #Lista dei domini da visualizzare nella combobox di ricerca
+    search_domain_list = [{'label': i, 'value': i} for i in df_result['Domain'].tolist()]
+
+    return dict(dataframe_all_result=df_result,
+                dataframe_https=df_https,
+                dataframe_perf=df_perf,
+                dataframe_trust=df_trust,
+                search_domain_list=search_domain_list)
