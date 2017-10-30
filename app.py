@@ -103,6 +103,10 @@ def update_https_plot(search_dropdown_value):
         columns = ['Domain Supports HTTPS',
                    'Domain Enforces HTTPS',
                    'Domain Uses Strong HSTS']
+        if df_https_selected.empty:
+            print('DataFrame HTTPS is empty!')
+            return create_bar_plot('Sicurezza', [0, 0, 0], columns)
+
         values = pd.DataFrame(df_https_selected, columns=columns).values[0]
 
         return create_bar_plot('Sicurezza', values.astype('O'), columns)
