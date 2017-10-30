@@ -7,9 +7,18 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# Rendering del plot sulla pagina Html
+badge = {
+    'A':'https://raw.githubusercontent.com/bsab/security-dashboard/master/static/img/CircleA.png',
+    'B':'https://raw.githubusercontent.com/bsab/security-dashboard/master/static/img/CircleB.png',
+    'C':'https://raw.githubusercontent.com/bsab/security-dashboard/master/static/img/CircleC.png',
+    'D':'https://raw.githubusercontent.com/bsab/security-dashboard/master/static/img/CircleD.png',
+    'E':'https://raw.githubusercontent.com/bsab/security-dashboard/master/static/img/CircleE.png',
+    'F':'https://raw.githubusercontent.com/bsab/security-dashboard/master/static/img/CircleF.png'
+}
 
 def check_valid_file_name(base_file_name, file_path):
-    fileName, fileExtension = os.path.splitext(file_path)
+    fileName = os.path.basename(file_path)
     return (fileName == base_file_name)
 
 def evalute_https_score(file_pshtt_csv):
@@ -155,17 +164,18 @@ def merge_df_results(df_score_https, df_score_performance, df_trust_performance)
                                   df_res['Trust Score'])/3)*300
 
     #assegno un bollino allo score
-    df_res.loc[:, 'Sticker'] = '/static/img/CircleF.png'
-    df_res['Sticker'] = np.where(df_res['Tot Score'] >= 1500, '/static/img/CircleA.png',
-                                 np.where(df_res['Tot Score'] >= 1200, '/static/img/CircleB.png',
-                                          np.where(df_res['Tot Score'] >= 900, '/static/img/CircleC.png',
-                                                   np.where(df_res['Tot Score'] >= 600, '/static/img/CircleD.png',
-                                                            np.where(df_res['Tot Score'] >= 300, '/static/img/CircleE.png',
-                                                                     '/static/img/CircleF.png')))))
+    df_res.loc[:, 'Sticker'] = badge['F']
+    df_res['Sticker'] = np.where(df_res['Tot Score'] >= 1500, badge['A'],
+                                 np.where(df_res['Tot Score'] >= 1200, badge['B'],
+                                          np.where(df_res['Tot Score'] >= 900, badge['C'],
+                                                   np.where(df_res['Tot Score'] >= 600, badge['D'],
+                                                            np.where(df_res['Tot Score'] >= 300, badge['E'],
+                                                                     badge['F'])))))
 
     return df_res
 
 def perform_classification(dict_data):
+    print "perform_classification"
     """
     Questa procedura esegue l'mport dei csv ottenuti dall'utility domain-scan
     e classifica ogni dominio rispetto ai parametri di sicurezza, performance
