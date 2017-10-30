@@ -15,7 +15,6 @@ def check_valid_file_name(base_file_name, file_path):
 def evalute_https_score(file_pshtt_csv):
     """
     return a Dataframe score for HTTPS
-    :return:
     """
 
     #seleziono solo le colonne interessanti per il calcolo
