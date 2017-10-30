@@ -2,10 +2,12 @@
 import os
 import flask
 import pandas as pd
+from dash import Dash
+from flask import Flask
+
 import dash_core_components as dcc
 from dash.dependencies import Input, Output
 
-from server import app
 from classifier import perform_classification
 from plot import get_explore_domain_plot, create_bar_plot
 from domains import get_domain_dict, get_domain_image_preview
@@ -16,6 +18,11 @@ dcc._js_dist[0]['external_url'] = (
     'https://cdn.plot.ly/plotly-basic-1.31.0.min.js'
 )
 
+server = Flask(__name__, static_url_path='/static', static_folder='./static')
+server.secret_key = os.environ.get('secret_key', 'secret')
+app = Dash(__name__, server=server, url_base_pathname='/security-dashboard/', csrf_protect=False)
+
+app.config.supress_callback_exceptions = True
 app.title = 'security-dashboard'
 
 
