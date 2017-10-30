@@ -48,7 +48,7 @@ Now, you can run the application locally.
     python app.py
 
 The following are screenshots for the app in this repo:
-
+![Alt desc](https://raw.githubusercontent.com/bsab/security-dashboard/master/screenshots/Screenshot_1.png)
 
 ## Authors
 
