@@ -13,9 +13,7 @@ def check_valid_file_name(base_file_name, file_path):
     return (fileName == base_file_name)
 
 def evalute_https_score(file_pshtt_csv):
-    """
-    return a Dataframe score for HTTPS
-    """
+    """ classifica il dominio rispetto ai parametri HTTPS"""
 
     #seleziono solo le colonne interessanti per il calcolo
     columns = ['Domain',
@@ -58,9 +56,8 @@ def evalute_https_score(file_pshtt_csv):
 
 
 def evalute_performance_score(file_pageload_csv):
-    """
-    return a Dataframe score for performance domain
-    """
+    """ classifica il dominio rispetto ai parametri di Performance
+    letti dal file csv "Pageload.csv"""
 
     # seleziono solo le colonne interessanti per il calcolo
     #in questo caso quelle che riguardano il caricamento del DOM
@@ -100,10 +97,8 @@ def evalute_performance_score(file_pageload_csv):
 
 
 def evalute_trust_score(file_trust_csv):
-    """
-    return a Dataframe score for trust domain
-    :return:
-    """
+    """ classifica il dominio rispetto ai parametri di affidabilita'
+    letti dal file csv "trust.csv"""
 
     # seleziono solo le colonne interessanti per il calcolo
     # in questo caso quelle che riguardano i protocolli MX, SPF, DMARC
@@ -144,9 +139,8 @@ def evalute_trust_score(file_trust_csv):
 
 
 def merge_df_results(df_score_https, df_score_performance, df_trust_performance):
-    """
-    unisce i risultati dei dataframe precedenti delle performance
-    :return:
+    """Unisce i risultati dei dataframe precedenti in un unico dataframe
+    di risultati
     """
 
     # df_score_https + df_score_performance
