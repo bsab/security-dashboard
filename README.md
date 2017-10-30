@@ -16,6 +16,8 @@ The domain that gets the highest value in all three of these features can be con
 
 Check out the [Live Demo](https://security-dashboard.herokuapp.com/security-dashboard).
 
+![Alt desc](https://raw.githubusercontent.com/bsab/security-dashboard/master/screenshots/Screenshot_1.png)
+
 Requirements
 ----
 Python 2.7
@@ -40,6 +42,8 @@ anyway here the commands you have to enter:
     cd security-dashboard
     pip install -r requirements.txt
 
+To update the data-set, overwrite the files pageload.csv, pshtt.csv and trustymail.csv inside direcotry data/csv
+
 Running Your Application
 ------------------------
 
@@ -47,8 +51,6 @@ Now, you can run the application locally.
 
     python app.py
 
-The following are screenshots for the app in this repo:
-![Alt desc](https://raw.githubusercontent.com/bsab/security-dashboard/master/screenshots/Screenshot_1.png)
 
 ## Authors
 
