@@ -39,7 +39,7 @@ def tab_introduction():
             ]),
             html.P(
                 "Considerando questi fattori, ad ogni dominio viene attribuito un punteggio da A a F."),
-            html.Img(src='/static/img/classifica.png',
+            html.Img(src='https://raw.githubusercontent.com/bsab/security-dashboard/master/static/img/classifica.png',
                      style={'margin': '0 auto',
                             'display': 'block'}),
             html.P(
