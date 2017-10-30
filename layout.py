@@ -274,16 +274,7 @@ def render_tab_page(tab_index,
                                     dcc.Graph(id='clickable-graph',
                                               style=dict(width='100%'),
                                               hoverData=dict(points=[dict(pointNumber=0)]),
-                                              figure=search_domain_graph),
-                                    dcc.RadioItems(
-                                        id='charts_radio',
-                                        options=[
-                                            dict(label='Visualizzazione 2D', value='scatter'),
-                                            dict(label='Visualizzazione 3D', value='scatter3d')
-                                        ],
-                                        labelStyle=dict(display='inline'),
-                                        value='scatter'
-                                    )
+                                              figure=search_domain_graph)
                                 ],
                                 className='twelve columns',
                             ),
